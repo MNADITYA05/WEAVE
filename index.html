@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Weave — SPICE ↔ LTspice Schematic</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header>
+  <h1>weave</h1><span id="ver"></span>
+  <span class="sub">SPICE &harr; LTspice schematic &middot; elkjs layout &middot; fully client-side</span>
+</header>
+<div class="tabs">
+  <button class="tab active" id="tab1" onclick="switchTab(1)">Netlist &rarr; Schematic</button>
+  <button class="tab"        id="tab2" onclick="switchTab(2)">Schematic &rarr; Netlist</button>
+</div>
+
+<!-- ===== TAB 1: Netlist → Schematic (original Weave) ===== -->
+<div class="tabpanel active" id="panel1">
+  <div class="toolbar">
+    <select id="ex"></select>
+    <button id="go">Convert</button>
+    <button id="dl">Download .asc</button>
+    <span id="status"></span>
+    <span class="spacer"></span>
+    <span id="info"></span>
+    <span id="nsym"></span>
+  </div>
+  <div id="workspace">
+    <div id="toprow">
+      <div class="pane" id="leftpane"><div class="label">netlist (input)</div><textarea id="nl" spellcheck="false"></textarea></div>
+      <div class="vgutter" id="vgut"></div>
+      <div class="pane" id="rightpane"><div class="label" style="display:flex;align-items:center;justify-content:space-between;padding-right:6px"><span>schematic (.asc output)</span><span><button class="vtbtn active" id="btn-textv" onclick="setAscView('text')">Text</button><button class="vtbtn" id="btn-visv" onclick="setAscView('visual')">Visual</button></span></div><pre id="ascview" class="view"></pre><div id="svgview"><svg id="schsvg" viewBox="0 0 400 400"></svg></div></div>
+    </div>
+    <div class="hgutter" id="hgut"></div>
+    <pre id="console"></pre>
+  </div>
+</div>
+
+<!-- ===== TAB 2: Schematic → Netlist ===== -->
+<div class="tabpanel" id="panel2">
+  <div class="toolbar">
+    <button id="go2">Extract Netlist</button>
+    <button id="dl2">Download .net</button>
+    <button id="paste2">Paste from Tab 1</button>
+    <span id="status2"></span>
+    <span class="spacer"></span>
+    <span id="info2"></span>
+  </div>
+  <div id="workspace2">
+    <div id="toprow2">
+      <div class="pane" id="leftpane2"><div class="label">schematic (.asc input)</div><textarea id="asc2" spellcheck="false" placeholder="Paste LTspice .asc content here…"></textarea></div>
+      <div class="vgutter" id="vgut2"></div>
+      <div class="pane" id="rightpane2"><div class="label">netlist (output)</div><pre id="nlview" class="view"></pre></div>
+    </div>
+    <div class="hgutter" id="hgut2"></div>
+    <pre id="console2"></pre>
+  </div>
+</div>
+
+<!-- Scripts: load order matters — ELK → data → src -->
+<script src="lib/elk.js?v=2"></script>
+<script src="data/symtable.js?v=2"></script>
+<script src="data/sym-draw.js?v=2"></script>
+<script type="module" src="src/app.js?v=20"></script>
+<script defer src="tests/suite.js"></script>
+</body>
+</html>
