@@ -4,7 +4,7 @@ import { compare } from './verifier.js';
 import { parseNetlist } from './netlist-parser.js';
 import { SYMBOLS, blockAsyFiles } from './symbols.js';
 
-import { asc2net } from './asc2net.js';
+import { initEditor } from './schematic-editor.js?v=4';
 import { _mergeWires, _detectJunctions } from './wire-merge.js?v=3';
 import { setAscView, renderSchematic } from './renderer.js';
 const APP_VERSION='5.0';
@@ -150,51 +150,19 @@ function download(){
 }
 
 
-// ── TAB 2 state & UI ─────────────────────────────────────────────────────
-let lastNet2='';
 
-function run2(){
-  const src=document.getElementById('asc2').value.trim();
-  const status2=document.getElementById('status2');
-  const info2=document.getElementById('info2');
-  if(!src){status2.textContent='';status2.className='';return;}
-  try{
-    lastNet2=asc2net(src);
-    const nLines=lastNet2.split('\n').filter(l=>l.trim()&&!l.startsWith('*')).length;
-    document.getElementById('nlview').textContent=lastNet2;
-    info2.textContent=`${nLines} element(s)`;
-    status2.textContent='converted';
-    status2.className='ok';
-    clog2('converted .asc → netlist: '+nLines+' elements','ok');
-  }catch(e){
-    status2.textContent='error: '+e.message; status2.className='bad'; info2.textContent=''; lastNet2='';
-    document.getElementById('nlview').textContent='';
-    clog2('error: '+e.message,'err');
-  }
-  document.getElementById('dl2').disabled=!lastNet2;
-}
-
-function download2(){
-  if(!lastNet2) return;
-  const d=new Date(), p2=n=>String(n).padStart(2,'0');
-  const stamp=d.getFullYear()+p2(d.getMonth()+1)+p2(d.getDate())+p2(d.getHours())+p2(d.getMinutes());
-  const b=new Blob([lastNet2],{type:'text/plain'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(b); a.download='netlist_'+stamp+'.net'; a.click();
-  URL.revokeObjectURL(a.href);
-}
 
 // ── Boot ──────────────────────────────────────────────────────────────────
 // Expose functions needed by inline HTML onclick handlers
 window.switchTab = switchTab;
 window.convert = convert;
 window.compare = compare;
-window.asc2net = asc2net;
 window._mergeWires = _mergeWires;
 window._detectJunctions = _detectJunctions;
 window.parseNetlist = parseNetlist;
 window.setAscView = setAscView;
 window.addEventListener('DOMContentLoaded',()=>{
+  initEditor(document.getElementById('sc-root'));
   document.getElementById('ver').textContent='v'+APP_VERSION;
   document.getElementById('nsym').textContent=Object.keys(SYMBOLS).length+' symbols loaded';
 
@@ -225,21 +193,6 @@ window.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('dl').onclick=download;
   let t1; document.getElementById('nl').addEventListener('input',()=>{clearTimeout(t1);t1=setTimeout(run,500);});
 
-  // tab2 buttons
-  document.getElementById('go2').onclick=run2;
-  document.getElementById('dl2').onclick=download2;
-  document.getElementById('paste2').onclick=()=>{
-    if(lastAsc){
-      document.getElementById('asc2').value=lastAsc;
-      switchTab(2);
-      run2();
-    } else {
-      clog2('No .asc yet — run Tab 1 first','warn');
-      switchTab(1);
-    }
-  };
-  let t2; document.getElementById('asc2').addEventListener('input',()=>{clearTimeout(t2);t2=setTimeout(run2,500);});
-
   // draggable gutters tab1
   (function(){
     const g=document.getElementById('vgut'), L=document.getElementById('leftpane'), R=document.getElementById('rightpane'), row=document.getElementById('toprow');
@@ -250,21 +203,6 @@ window.addEventListener('DOMContentLoaded',()=>{
   })();
   (function(){
     const g=document.getElementById('hgut'),C=document.getElementById('console'),ws=document.getElementById('workspace');
-    let drag=false;
-    g.addEventListener('mousedown',e=>{drag=true;e.preventDefault();document.body.style.userSelect='none';});
-    window.addEventListener('mousemove',e=>{if(!drag)return;const r=ws.getBoundingClientRect();let h=r.bottom-e.clientY;h=Math.max(24,Math.min(r.height-120,h));C.style.height=h+'px';});
-    window.addEventListener('mouseup',()=>{drag=false;document.body.style.userSelect='';});
-  })();
-  // draggable gutters tab2
-  (function(){
-    const g=document.getElementById('vgut2'), L=document.getElementById('leftpane2'), R=document.getElementById('rightpane2'), row=document.getElementById('toprow2');
-    let drag=false;
-    g.addEventListener('mousedown',e=>{drag=true;e.preventDefault();document.body.style.userSelect='none';});
-    window.addEventListener('mousemove',e=>{if(!drag)return;const r=row.getBoundingClientRect();let f=(e.clientX-r.left)/r.width;f=Math.max(0.15,Math.min(0.85,f));L.style.flex='0 0 '+(f*100)+'%';R.style.flex='1 1 auto';});
-    window.addEventListener('mouseup',()=>{drag=false;document.body.style.userSelect='';});
-  })();
-  (function(){
-    const g=document.getElementById('hgut2'),C=document.getElementById('console2'),ws=document.getElementById('workspace2');
     let drag=false;
     g.addEventListener('mousedown',e=>{drag=true;e.preventDefault();document.body.style.userSelect='none';});
     window.addEventListener('mousemove',e=>{if(!drag)return;const r=ws.getBoundingClientRect();let h=r.bottom-e.clientY;h=Math.max(24,Math.min(r.height-120,h));C.style.height=h+'px';});

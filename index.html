@@ -39,30 +39,14 @@
 
 <!-- ===== TAB 2: Schematic → Netlist ===== -->
 <div class="tabpanel" id="panel2">
-  <div class="toolbar">
-    <button id="go2">Extract Netlist</button>
-    <button id="dl2">Download .net</button>
-    <button id="paste2">Paste from Tab 1</button>
-    <span id="status2"></span>
-    <span class="spacer"></span>
-    <span id="info2"></span>
-  </div>
-  <div id="workspace2">
-    <div id="toprow2">
-      <div class="pane" id="leftpane2"><div class="label">schematic (.asc input)</div><textarea id="asc2" spellcheck="false" placeholder="Paste LTspice .asc content here…"></textarea></div>
-      <div class="vgutter" id="vgut2"></div>
-      <div class="pane" id="rightpane2"><div class="label">netlist (output)</div><pre id="nlview" class="view"></pre></div>
-    </div>
-    <div class="hgutter" id="hgut2"></div>
-    <pre id="console2"></pre>
-  </div>
+  <div id="sc-root" style="height:100%;display:flex;flex-direction:column"></div>
 </div>
 
 <!-- Scripts: load order matters — ELK → data → src -->
 <script src="lib/elk.js?v=2"></script>
 <script src="data/symtable.js?v=2"></script>
 <script src="data/sym-draw.js?v=2"></script>
-<script type="module" src="src/app.js?v=20"></script>
+<script type="module" src="src/app.js?v=22"></script>
 <script defer src="tests/suite.js"></script>
 </body>
 </html>
