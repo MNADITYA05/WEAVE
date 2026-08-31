@@ -1,5 +1,5 @@
 'use strict';
-import { GRID, rot, rotBBox } from './geometry.js';
+import { GRID, rot, rotBBox } from '../shared/geometry.js';
 import { SYMBOLS } from './symbols.js';
 import { isFlag } from './classifier.js';
 // ---------- orientation ----------

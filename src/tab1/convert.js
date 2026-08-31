@@ -1,12 +1,12 @@
 'use strict';
-import { GRID, snap, rot, rotBBox } from './geometry.js';
+import { GRID, snap, rot, rotBBox } from '../shared/geometry.js';
 import { SYMBOLS } from './symbols.js';
 import { SAFE_MODES } from './safe-modes.js';
 import { parseNetlist } from './netlist-parser.js';
 import { classifyNets, isFlag, railLabel } from './classifier.js';
 import { netDepths, decorateComponents } from './orientation.js';
 import { buildElkGraph } from './layout.js';
-import { _detectTopologies, _applyTopologyHints } from './topology.js';
+import { _detectTopologies, _applyTopologyHints } from '../shared/topology.js';
 import { routeWires } from './router.js?v=2';
 import { resolveCollisions } from './place-repair.js';
 import { repairNets } from './net-repair.js';

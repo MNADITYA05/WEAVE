@@ -1,12 +1,12 @@
 'use strict';
-import { convert } from './convert.js?v=4';
-import { compare } from './verifier.js';
-import { parseNetlist } from './netlist-parser.js';
-import { SYMBOLS, blockAsyFiles } from './symbols.js';
+import { convert } from './tab1/convert.js?v=4';
+import { compare } from './tab1/verifier.js';
+import { parseNetlist } from './tab1/netlist-parser.js';
+import { SYMBOLS, blockAsyFiles } from './tab1/symbols.js';
 
-import { initEditor } from './schematic-editor.js?v=4';
-import { _mergeWires, _detectJunctions } from './wire-merge.js?v=3';
-import { setAscView, renderSchematic } from './renderer.js';
+import { initEditor } from './tab2/schematic-editor.js?v=4';
+import { _mergeWires, _detectJunctions } from './tab1/wire-merge.js?v=3';
+import { setAscView, renderSchematic } from './tab1/renderer.js';
 const APP_VERSION='5.0';
 
 // ── Tab switching ─────────────────────────────────────────────────────────

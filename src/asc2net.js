@@ -1,7 +1,7 @@
 'use strict';
-import { rot } from './geometry.js';
-import { SYMBOLS } from './symbols.js';
-import { parseAsc } from './verifier.js';
+import { rot } from './shared/geometry.js';
+import { SYMBOLS } from './tab1/symbols.js';
+import { parseAsc } from './tab1/verifier.js';
 // ── TAB 2: asc2net engine ────────────────────────────────────────────────
 // Reverse converter: LTspice .asc → SPICE netlist
 // Depends on: SYMBOLS (constants.js), rot() (constants.js), parseAsc() (verifier.js)

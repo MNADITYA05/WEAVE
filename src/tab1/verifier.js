@@ -1,5 +1,5 @@
 'use strict';
-import { rot } from './geometry.js';
+import { rot } from '../shared/geometry.js';
 import { SYMBOLS } from './symbols.js';
 import { parseNetlist } from './netlist-parser.js';
 import { classifyNets, isFlag, railLabel } from './classifier.js';

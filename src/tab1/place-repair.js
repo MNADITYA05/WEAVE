@@ -1,5 +1,5 @@
 'use strict';
-import { GRID } from './geometry.js';
+import { GRID } from '../shared/geometry.js';
 // ── Place repair: collision resolution ───────────────────────────────────
 // Called after ELK snap/nudge, before routeWires.
 // Detects any two placed components that share the same origin point or whose

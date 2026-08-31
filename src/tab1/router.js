@@ -1,5 +1,5 @@
 'use strict';
-import { GRID, snap, rot, rotBBox } from './geometry.js';
+import { GRID, snap, rot, rotBBox } from '../shared/geometry.js';
 import { SYMBOLS } from './symbols.js';
 import { isFlag, railLabel } from './classifier.js';
 import { placeIsolated } from './place-isolated.js';

@@ -1,5 +1,5 @@
 'use strict';
-import { GRID } from './geometry.js';
+import { GRID } from '../shared/geometry.js';
 import { SYMBOLS } from './symbols.js';
 import { isFlag } from './classifier.js';
 // ── Stage: ELK graph construction ─────────────────────────────────────────

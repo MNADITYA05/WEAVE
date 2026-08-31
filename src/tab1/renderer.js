@@ -1,5 +1,5 @@
 'use strict';
-import { GRID, rot, ROT_MAT, _svgMat } from './geometry.js';
+import { GRID, rot, ROT_MAT, _svgMat } from '../shared/geometry.js';
 import { SYMBOLS } from './symbols.js';
 import { NOROT } from './orientation.js';
 let _ascViewMode = 'text';

@@ -159,33 +159,34 @@ weave/
 ├── data/                       # Static reference data (symbol definitions, etc.)
 │
 ├── src/                        # All application source — plain ES modules
-│   ├── app.js                  # Entry point; mounts Tab 1 and Tab 2
+│   ├── app.js                  # Entry point; mounts Tab 1 and Tab 2 (imports from tab1/ & tab2/)
+│   ├── asc2net.js              # .asc → netlist converter — bidirectional utility (kept at root)
 │   │
-│   ├── schematic-editor.js     # Tab 2: full interactive SVG editor
-│   ├── schematic-symbols.js    # Component SVG shapes + pin coordinate definitions
+│   ├── tab1/                   # Netlist → Schematic pipeline (Tab 1)
+│   │   ├── convert.js          # Top-level Tab 1 orchestrator
+│   │   ├── netlist-parser.js   # SPICE netlist tokeniser and AST builder
+│   │   ├── classifier.js       # Topology classification (series/parallel/bridge etc.)
+│   │   ├── layout.js           # elkjs layout wrapper
+│   │   ├── router.js           # Wire routing logic
+│   │   ├── route-helpers.js    # Geometry helpers for routing
+│   │   ├── renderer.js         # LTspice .asc symbol emitter
+│   │   ├── flag-emit.js        # Net flag and GND symbol emitter
+│   │   ├── symbols.js          # LTspice symbol name mapping
+│   │   ├── orientation.js      # Component rotation and depth logic (uses symbols + classifier)
+│   │   ├── net-repair.js       # Net connectivity repair passes
+│   │   ├── place-isolated.js   # Layout for isolated (unconnected) components
+│   │   ├── place-repair.js     # Post-layout position repair
+│   │   ├── safe-modes.js       # Fallback rendering strategies
+│   │   ├── verifier.js         # Output netlist sanity checks
+│   │   └── wire-merge.js       # Wire segment simplification
 │   │
-│   ├── netlist-parser.js       # SPICE netlist tokeniser and AST builder
-│   ├── asc2net.js              # .asc → netlist converter (reverse direction)
-│   ├── classifier.js           # Topology classification (series/parallel/bridge etc.)
-│   ├── convert.js              # Top-level Tab 1 conversion orchestrator
+│   ├── tab2/                   # Schematic → Netlist pipeline (Tab 2)
+│   │   ├── schematic-editor.js # Full interactive SVG canvas editor + netlist generation
+│   │   └── schematic-symbols.js# Component SVG shapes + pin coordinate definitions
 │   │
-│   ├── layout.js               # elkjs layout wrapper
-│   ├── router.js               # Wire routing logic
-│   ├── route-helpers.js        # Geometry helpers for routing
-│   ├── geometry.js             # General 2D geometry utilities
-│   │
-│   ├── renderer.js             # LTspice .asc symbol emitter
-│   ├── flag-emit.js            # Net flag and GND symbol emitter
-│   ├── symbols.js              # LTspice symbol name mapping
-│   ├── orientation.js          # Component rotation logic
-│   │
-│   ├── topology.js             # Graph connectivity analysis
-│   ├── wire-merge.js           # Wire segment simplification
-│   ├── net-repair.js           # Net connectivity repair passes
-│   ├── place-isolated.js       # Layout for isolated (unconnected) components
-│   ├── place-repair.js         # Post-layout position repair
-│   ├── safe-modes.js           # Fallback rendering strategies
-│   └── verifier.js             # Output netlist sanity checks
+│   └── shared/                 # Pure geometry utilities — no tab1/tab2 dependencies
+│       ├── geometry.js         # 2D geometry primitives (GRID, snap, rot, rotBBox)
+│       └── topology.js         # Graph connectivity analysis (topology hints)
 │
 └── tests/                      # Test fixtures and scripts
 ```
@@ -293,9 +294,9 @@ Weave is fully static — there are no environment variables or server configura
 
 | Constant | File | Default | Description |
 |---|---|---|---|
-| `GRID` | `schematic-editor.js` | `16` | Canvas grid snap size in pixels |
-| `?v=N` query strings | `app.js`, `index.html` | incremented manually | Cache-busting version for ES module imports |
-| `elkjs` layout options | `layout.js` | see file | elk algorithm and spacing parameters |
+| `GRID` | `tab2/schematic-editor.js` | `16` | Canvas grid snap size in pixels |
+| `?v=N` query strings | `src/app.js`, `index.html` | incremented manually | Cache-busting version for ES module imports |
+| `elkjs` layout options | `tab1/layout.js` | see file | elk algorithm and spacing parameters |
 
 ---
 
@@ -368,7 +369,7 @@ symbol(opamp): add VCVS-based op-amp symbol
 ### Pull Request Checklist
 
 - [ ] No breaking changes to existing netlists
-- [ ] New symbols include correct pin coordinate definitions in `schematic-symbols.js`
+- [ ] New symbols include correct pin coordinate definitions in `tab2/schematic-symbols.js`
 - [ ] Wire connectivity verified (place + draw wire + Convert and check net names)
 - [ ] No external dependencies added (keep it zero-dep)
 - [ ] PR description explains *what* changed and *why*

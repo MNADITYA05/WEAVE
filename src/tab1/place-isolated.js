@@ -1,5 +1,5 @@
 'use strict';
-import { GRID, snap } from './geometry.js';
+import { GRID, snap } from '../shared/geometry.js';
 // ── place-isolated.js — supply-corner placement ───────────────────────────
 // Places components whose every net is a flag (e.g. V1 vcc 0 12) in a
 // single vertical column to the RIGHT of the main schematic extent.
