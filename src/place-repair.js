@@ -42,5 +42,19 @@ export function resolveCollisions(comps) {
       }
     }
   }
-  if (changed) throw new Error('resolveCollisions: components still overlapping after 500 iterations');
+  if (changed) {
+    // Find first still-colliding pair to name in the error
+    let pa = null, pb = null;
+    outer: for (let i = 0; i < placed.length; i++) {
+      for (let j = i + 1; j < placed.length; j++) {
+        const a = placed[i], b = placed[j];
+        if (a.origin[0] === b.origin[0] && a.origin[1] === b.origin[1]) { pa = a; pb = b; break outer; }
+        const ax1=a.x, ay1=a.y, ax2=ax1+(a.rbb[2]-a.rbb[0]), ay2=ay1+(a.rbb[3]-a.rbb[1]);
+        const bx1=b.x, by1=b.y, bx2=bx1+(b.rbb[2]-b.rbb[0]), by2=by1+(b.rbb[3]-b.rbb[1]);
+        if (ax1<bx2 && ax2>bx1 && ay1<by2 && ay2>by1) { pa = a; pb = b; break outer; }
+      }
+    }
+    const who = pa ? ('"'+pa.name+'" and "'+pb.name+'" at origin ('+pa.origin+') vs ('+pb.origin+')') : '(pair unidentified)';
+    throw new Error('resolveCollisions: still overlapping after 500 iterations — '+who);
+  }
 }

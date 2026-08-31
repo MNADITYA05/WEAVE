@@ -9,6 +9,7 @@ import { buildElkGraph } from './layout.js';
 import { _detectTopologies, _applyTopologyHints } from './topology.js';
 import { routeWires } from './router.js?v=2';
 import { resolveCollisions } from './place-repair.js';
+import { repairNets } from './net-repair.js';
 
 import { emitAsc } from './renderer.js';
 import { _mergeWires, _detectJunctions } from './wire-merge.js?v=3';
@@ -130,6 +131,7 @@ export async function convert(text, opts){
   const {graph, portId, bridges} = buildElkGraph(comps, opts, cls, depth);
 
   // Singleton ELK instance — reuse Worker across calls; kill and recreate on timeout
+  if (typeof ELK === 'undefined') throw new Error('ELK layout engine not loaded — check that elk.js script tag executed before convert() was called');
   if (!convert._elk) convert._elk = new ELK();
   const elk = convert._elk;
   // Stage 3: detect analog topologies and hint ELK layout
@@ -197,6 +199,7 @@ export async function convert(text, opts){
 
   resolveCollisions(comps);
   const {wires, flags} = routeWires(comps, opamps, out.edges, portId, bridges, cls, opts);
+  repairNets(comps, wires, flags, cls);
   let asc = emitAsc(comps, wires, flags, directives);
   asc = _mergeWires(asc);
   asc = _detectJunctions(asc);

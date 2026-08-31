@@ -258,18 +258,16 @@ export function routeWires(comps, opamps, elkEdges, portId, bridges, cls, opts){
       if(xj===null && runs.length){
         const R=runs[0];
         xj=snap((Math.min(R[0],R[2])+Math.max(R[0],R[2]))/2); yj=R[1];
-        console.warn('weave far-fb: forced midpoint on',F.upNet,'at',xj,yj);
+        throw new Error('routeWires far-fb: no clean drop column found for upstream net "'+F.upNet+'" — all candidate columns blocked by foreign wires. Cannot place far-feedback element '+F.name);
       }
       if(xj===null){
         const o=comps.find(o=>o.inGraph&&o.nets.includes(F.upNet));
         const oi=o?o.nets.indexOf(F.upNet):-1;
         if(o&&oi>=0){
           const tx=o.tips[oi][0],ty=o.tips[oi][1];
-          wires.push([tx-GRID*2,ty,tx+GRID*2,ty,F.upNet]);
-          xj=tx; yj=ty;
-          console.warn('weave far-fb: synthesized bus for',F.upNet,'at y=',ty);
+          throw new Error('routeWires far-fb: no horizontal run exists for upstream net "'+F.upNet+'" — cannot anchor far-feedback element '+F.name+' (component '+o.name+' at tip '+tx+','+ty+')');
         } else {
-          console.warn('weave far-fb: no component for upNet',F.upNet);
+          throw new Error('routeWires far-fb: no in-graph component found for upstream net "'+F.upNet+'" — cannot anchor far-feedback element '+F.name);
         }
       }
       const left = F.rpins[0][0] < F.rpins[1][0] ? 0 : 1, right = 1-left;
