@@ -1,0 +1,16 @@
+{
+  "name": "weave",
+  "version": "5.0.0",
+  "description": "SPICE ↔ LTspice schematic converter — fully client-side",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11"
+  }
+}
