@@ -1,9 +1,23 @@
-'use strict';
-// schematic-symbols.js — SVG symbol definitions for the canvas schematic editor
-// Each entry: label, prefix, group, pins (R0 coords relative to origin, SPICE order),
-// pinNames, netName (power flags only), refOffset, valOffset, svg() → HTML string
+/**
+ * schematic-symbols.ts — SVG symbol definitions for the canvas schematic editor
+ *
+ * Each entry: label, prefix, group, pins (R0 coords relative to origin, SPICE order),
+ * pinNames, netName (power flags only), refOffset, valOffset, svg → HTML string
+ */
 
-export const SYMDEFS = {
+export interface SymDef {
+  label:     string;
+  prefix:    string;
+  group:     string;
+  pins:      [number, number][];
+  pinNames:  string[];
+  netName?:  string;
+  refOffset: [number, number] | null;
+  valOffset: [number, number] | null;
+  svg:       string;
+}
+
+export const SYMDEFS: Record<string, SymDef> = {
   // ── PASSIVES ──────────────────────────────────────────────────────────────
   R: {
     label:'Resistor', prefix:'R', group:'Passives',
@@ -291,7 +305,12 @@ export const SYMDEFS = {
   },
 };
 
-export const PALETTE_GROUPS = [
+export interface PaletteGroup {
+  name:  string;
+  types: string[];
+}
+
+export const PALETTE_GROUPS: PaletteGroup[] = [
   { name:'Passives',  types:['R','C','L','K'] },
   { name:'Sources',   types:['V','I','E','G','F','H','B'] },
   { name:'Semis',     types:['D','Q_NPN','Q_PNP','M_NMOS','M_PMOS','J_N','J_P'] },
