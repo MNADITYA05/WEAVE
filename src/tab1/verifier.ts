@@ -10,7 +10,8 @@
  */
 
 import type { ParsedComponent, RotCode } from '../types.js';
-import { rot } from '../shared/geometry.js';
+import { rot, onSeg, ptKey } from '../shared/geometry.js';
+import { UF } from '../shared/union-find.js';
 import { parseNetlist } from './netlist-parser.js';
 import { classifyNets, isFlag, railLabel } from './classifier.js';
 
@@ -53,34 +54,6 @@ export function parseAsc(text: string): ParsedAsc {
   return { wires, flags, syms };
 }
 
-// ─── Union-Find ───────────────────────────────────────────────────────────────
-
-export class UF {
-  private p = new Map<string, string>();
-
-  find(k: string): string {
-    if (!this.p.has(k)) this.p.set(k, k);
-    let r = k;
-    while (this.p.get(r) !== r) r = this.p.get(r)!;
-    while (this.p.get(k) !== r) { const n = this.p.get(k)!; this.p.set(k, r); k = n; }
-    return r;
-  }
-
-  union(a: string, b: string): void {
-    this.p.set(this.find(a), this.find(b));
-  }
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function ptKey(x: number, y: number): string { return `${x},${y}`; }
-
-function onSeg(px: number, py: number, w: AscWire): boolean {
-  if (w.x1 === w.x2) return px === w.x1 && py >= Math.min(w.y1, w.y2) && py <= Math.max(w.y1, w.y2);
-  if (w.y1 === w.y2) return py === w.y1 && px >= Math.min(w.x1, w.x2) && px <= Math.max(w.x1, w.x2);
-  return false;
-}
-
 // ─── connectivity ─────────────────────────────────────────────────────────────
 
 export function connectivity(asc: string): NetMap {
@@ -108,25 +81,22 @@ export function connectivity(asc: string): NetMap {
     pts.add(ptKey(w.x2, w.y2));
   }
 
-  // Split wires at all interesting points lying on them, union consecutive
   for (const w of wires) {
     const on = [...pts]
       .map(k => k.split(',').map(Number) as [number, number])
-      .filter(([px, py]) => onSeg(px, py, w));
+      .filter(([px, py]) => onSeg(px, py, w.x1, w.y1, w.x2, w.y2));
     on.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
     for (let i = 1; i < on.length; i++) {
       uf.union(ptKey(on[i - 1]![0], on[i - 1]![1]), ptKey(on[i]![0], on[i]![1]));
     }
   }
 
-  // Flags name their group
   const groupName = new Map<string, string>();
   for (const f of flags) {
     const g = uf.find(ptKey(f.x, f.y));
     groupName.set(g, f.name === '0' ? '0' : f.name);
   }
 
-  // Group pins into nets; same-named flag groups merge across sheet
   const nets: NetMap = new Map();
   for (const pr of pinRecs) {
     const g  = uf.find(ptKey(pr.pt[0], pr.pt[1]));
@@ -198,7 +168,7 @@ export function compare(nlText: string, ascText: string): string[] {
       const rp = rot(p, s.rot as RotCode);
       const ax = s.x + rp[0], ay = s.y + rp[1];
       if (pinPts.has(ptKey(ax, ay))) return;
-      if (ascWires.some(w => onSeg(ax, ay, w))) return;
+      if (ascWires.some(w => onSeg(ax, ay, w.x1, w.y1, w.x2, w.y2))) return;
       errs.push(`pin not reached by wire: ${s.name ?? s.sym}[${i}] at ${ax},${ay}`);
     });
   }

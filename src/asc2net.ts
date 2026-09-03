@@ -1,30 +1,13 @@
 /**
  * asc2net.ts — Reverse converter: LTspice .asc → SPICE netlist
  *
- * Depends on: SYMBOLS (symbols.ts), rot() (geometry.ts), parseAsc() (verifier.ts)
+ * Depends on: SYMBOLS (symbols.ts), rot() (geometry.ts)
  */
 
-import { rot } from './shared/geometry.js';
+import { rot, onSeg, ptKey } from './shared/geometry.js';
+import { UF } from './shared/union-find.js';
 import { SYMBOLS } from './tab1/symbols.js';
 import type { RotCode, Point } from './types.js';
-
-// ─── Local union-find (avoids conflict with verifier's UF) ───────────────────
-
-class UF2 {
-  private p = new Map<string, string>();
-
-  find(k: string): string {
-    if (!this.p.has(k)) this.p.set(k, k);
-    let r = k;
-    while (this.p.get(r) !== r) r = this.p.get(r)!;
-    while (this.p.get(k) !== r) { const n = this.p.get(k)!; this.p.set(k, r); k = n; }
-    return r;
-  }
-
-  union(a: string, b: string): void {
-    this.p.set(this.find(a), this.find(b));
-  }
-}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -39,15 +22,6 @@ interface AscSym2   {
 interface PinCoord  { sym: AscSym2; pinIdx: number; pt: Point }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-const key2 = (p: Point): string => `${p[0]},${p[1]}`;
-
-const onSeg2 = (p: Point, w: Wire4): boolean => {
-  const [x1, y1, x2, y2] = w;
-  if (x1 === x2) return p[0] === x1 && p[1] >= Math.min(y1, y2) && p[1] <= Math.max(y1, y2);
-  if (y1 === y2) return p[1] === y1 && p[0] >= Math.min(x1, x2) && p[0] <= Math.max(x1, x2);
-  return false;
-};
 
 function findSymDef(symName: string) {
   if (SYMBOLS[symName]) return SYMBOLS[symName];
@@ -66,24 +40,25 @@ function buildNetNames(
   flags: AscFlag2[],
   pinPoints: Point[],
 ): { netOf: (pt: Point) => string } {
-  const uf  = new UF2();
+  const uf  = new UF();
   const pts = new Set<string>();
-  for (const pp of pinPoints) pts.add(key2(pp));
-  for (const f of flags) pts.add(key2([f.x, f.y]));
-  for (const w of wires) { pts.add(key2([w[0], w[1]])); pts.add(key2([w[2], w[3]])); }
+  for (const pp of pinPoints) pts.add(ptKey(pp[0], pp[1]));
+  for (const f of flags) pts.add(ptKey(f.x, f.y));
+  for (const w of wires) { pts.add(ptKey(w[0], w[1])); pts.add(ptKey(w[2], w[3])); }
   for (const w of wires) {
-    const on = [...pts].map(k => k.split(',').map(Number) as Point).filter(p => onSeg2(p, w));
+    const on = [...pts].map(k => k.split(',').map(Number) as Point)
+                       .filter(p => onSeg(p[0], p[1], w[0], w[1], w[2], w[3]));
     on.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
-    for (let i = 1; i < on.length; i++) uf.union(key2(on[i - 1]!), key2(on[i]!));
+    for (let i = 1; i < on.length; i++) uf.union(ptKey(on[i - 1]![0], on[i - 1]![1]), ptKey(on[i]![0], on[i]![1]));
   }
   const groupName = new Map<string, string>();
   for (const f of flags) {
-    const g = uf.find(key2([f.x, f.y]));
+    const g = uf.find(ptKey(f.x, f.y));
     groupName.set(g, f.name === '0' ? '0' : f.name);
   }
   let autoIdx = 1;
   const netOf = (pt: Point): string => {
-    const g = uf.find(key2(pt));
+    const g = uf.find(ptKey(pt[0], pt[1]));
     if (!groupName.has(g)) groupName.set(g, 'N' + String(autoIdx++).padStart(3, '0'));
     return groupName.get(g)!;
   };

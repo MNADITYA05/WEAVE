@@ -7,6 +7,7 @@
  */
 
 import type { NetClassMap, WireSegment, FlagEntry, Point } from '../types.js';
+import { onSeg } from '../shared/geometry.js';
 import { railLabel } from './classifier.js';
 
 // Minimal shape of a placed component needed by this pass.
@@ -14,13 +15,6 @@ interface RepairComp {
   readonly name: string;
   readonly nets: readonly string[];
   abs?: readonly Point[];
-}
-
-function ptOnSeg(p: Point, w: WireSegment): boolean {
-  const [x1, y1, x2, y2] = w;
-  if (x1 === x2) return p[0] === x1 && p[1] >= Math.min(y1, y2) && p[1] <= Math.max(y1, y2);
-  if (y1 === y2) return p[1] === y1 && p[0] >= Math.min(x1, x2) && p[0] <= Math.max(x1, x2);
-  return false;
 }
 
 /**
@@ -46,7 +40,7 @@ export function repairNets(
       const [px, py] = c.abs![i]!;
       const pinKey   = `${px},${py}`;
       if (endpoints.has(pinKey)) return;
-      if (wires.some(w => ptOnSeg([px, py], w))) return;
+      if (wires.some(w => onSeg(px, py, w[0], w[1], w[2], w[3]))) return;
 
       const label = t === 'gnd' ? '0' : railLabel(n, comps as any);
       const dirs: [number, number][] = [[0, 1], [0, -1], [1, 0], [-1, 0]];
@@ -54,7 +48,7 @@ export function repairNets(
         const ex = px + dx * 32, ey = py + dy * 32;
         const endClear = !wires.some(w => {
           if ((w[4] ?? '').startsWith('FLAG:')) return false;
-          return ptOnSeg([ex, ey], w);
+          return onSeg(ex, ey, w[0], w[1], w[2], w[3]);
         });
         if (endClear) {
           wires.push([px, py, ex, ey, 'FLAG:' + label]);

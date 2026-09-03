@@ -6,6 +6,8 @@
 
 import { SYMDEFS, PALETTE_GROUPS } from './schematic-symbols.js';
 import type { SymDef } from './schematic-symbols.js';
+import { onSeg } from '../shared/geometry.js';
+import { UF } from '../shared/union-find.js';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -299,25 +301,18 @@ function defaultValue(type: string): string {
   return map[type] ?? '?';
 }
 
-// ─── Point-on-segment ─────────────────────────────────────────────────────────
-
-function ptOnSeg(px: number, py: number, x1: number, y1: number, x2: number, y2: number): boolean {
-  if (x1 === x2) return px === x1 && py >= Math.min(y1, y2) && py <= Math.max(y1, y2);
-  if (y1 === y2) return py === y1 && px >= Math.min(x1, x2) && px <= Math.max(x1, x2);
-  return false;
-}
 
 // ─── Junction detection ───────────────────────────────────────────────────────
 
 function detectJunctions(): void {
   const cnt = new Map<string, number>();
-  const bump = (k: string): void => cnt.set(k, (cnt.get(k) ?? 0) + 1);
+  const bump = (k: string): void => { cnt.set(k, (cnt.get(k) ?? 0) + 1); };
   for (const w of S.wires) { bump(w.x1 + ',' + w.y1); bump(w.x2 + ',' + w.y2); }
   for (const w of S.wires) {
     for (const w2 of S.wires) {
       if (w === w2) continue;
       for (const [ex, ey] of [[w.x1, w.y1], [w.x2, w.y2]] as [number, number][]) {
-        if (ptOnSeg(ex, ey, w2.x1, w2.y1, w2.x2, w2.y2) &&
+        if (onSeg(ex, ey, w2.x1, w2.y1, w2.x2, w2.y2) &&
             !(ex === w2.x1 && ey === w2.y1) && !(ex === w2.x2 && ey === w2.y2)) {
           cnt.set(ex + ',' + ey, 99);
         }
@@ -445,17 +440,6 @@ function deleteSelected(): void {
 // ─── Netlist generation ───────────────────────────────────────────────────────
 
 function generateNetlist(): string {
-  class UF {
-    private p = new Map<string, string>();
-    find(k: string): string {
-      if (!this.p.has(k)) this.p.set(k, k);
-      let r = k;
-      while (this.p.get(r) !== r) r = this.p.get(r)!;
-      while (this.p.get(k) !== r) { const n = this.p.get(k)!; this.p.set(k, r); k = n; }
-      return r;
-    }
-    union(a: string, b: string): void { this.p.set(this.find(a), this.find(b)); }
-  }
   const uf  = new UF();
   const pts = new Set<string>();
   for (const w of S.wires) { pts.add(w.x1 + ',' + w.y1); pts.add(w.x2 + ',' + w.y2); }
@@ -468,7 +452,7 @@ function generateNetlist(): string {
   }
   const ptArr = [...pts].map(k => k.split(',').map(Number) as [number, number]);
   for (const w of S.wires) {
-    const sp = ptArr.filter(([px, py]) => ptOnSeg(px, py, w.x1, w.y1, w.x2, w.y2));
+    const sp = ptArr.filter(([px, py]) => onSeg(px, py, w.x1, w.y1, w.x2, w.y2));
     sp.sort((a, b) => a[0]! - b[0]! || a[1]! - b[1]!);
     for (let i = 1; i < sp.length; i++) {
       uf.union(sp[i - 1]![0] + ',' + sp[i - 1]![1], sp[i]![0] + ',' + sp[i]![1]);

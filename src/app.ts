@@ -193,7 +193,7 @@ function download(): void {
 (window as Window & typeof globalThis & Record<string, unknown>).setAscView        = setAscView;
 
 window.addEventListener('DOMContentLoaded', () => {
-  initEditor(document.getElementById('sc-root'));
+  initEditor(document.getElementById('sc-root')!);
 
   (document.getElementById('ver')  as HTMLElement).textContent = 'v' + APP_VERSION;
   (document.getElementById('nsym') as HTMLElement).textContent = Object.keys(SYMBOLS).length + ' symbols loaded';
