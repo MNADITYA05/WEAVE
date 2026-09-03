@@ -181,12 +181,14 @@ export async function convert(text: string, opts: ConvertOpts = {}): Promise<str
   }
 
   // ── Stage 8: collision repair & wire routing ──────────────────────────────
-  resolveCollisions(annotated);
-  const { wires, flags } = routeWires(annotated, opamps, out.edges ?? [], portId, bridges, cls, opts);
-  repairNets(annotated, wires, flags, cls);
+  resolveCollisions(annotated as any);
+  const { wires: wiresRO, flags: flagsRO } = routeWires(annotated as any, opamps as any, out.edges ?? [], portId as any, bridges as any, cls, opts as any);
+  const wires = wiresRO as import('../types.js').WireSegment[];
+  const flags = flagsRO as import('../types.js').FlagEntry[];
+  repairNets(annotated as any, wires, flags, cls);
 
   // ── Stage 9: emit + clean ─────────────────────────────────────────────────
-  let asc = emitAsc(annotated as never, wires, flags, directives);
+  let asc = emitAsc(annotated as never, wires as any, flags as any, directives);
   asc = mergeWires(asc);
   asc = detectJunctions(asc);
   return asc;
