@@ -49,13 +49,21 @@ export class WaveformViewer {
     this.nodeSelEl.className = 'sc3-node-sel';
     root.appendChild(this.nodeSelEl);
 
+    // SVG wrapper (position:relative so SVG can fill it absolutely)
+    const svgWrap = document.createElement('div');
+    svgWrap.className = 'sc3-wave-wrap';
+    root.appendChild(svgWrap);
+
     // SVG
     this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg') as SVGSVGElement;
     this.svg.setAttribute('class', 'sc3-wave-svg');
     this.svg.setAttribute('viewBox', `0 0 ${this.W} ${this.H}`);
+    this.svg.setAttribute('preserveAspectRatio', 'none');
+    this.svg.style.position = 'absolute';
+    this.svg.style.inset = '0';
     this.svg.style.width = '100%';
     this.svg.style.height = '100%';
-    root.appendChild(this.svg);
+    svgWrap.appendChild(this.svg);
 
     this.axisG = document.createElementNS('http://www.w3.org/2000/svg', 'g') as SVGGElement;
     this.plotG = document.createElementNS('http://www.w3.org/2000/svg', 'g') as SVGGElement;
@@ -113,12 +121,12 @@ export class WaveformViewer {
   load(xVec: WaveVector, yVecs: WaveVector[]): void {
     this.xVec = xVec;
     this.traces = yVecs.map((v, i) => ({
-      vec: v, color: COLORS[i % COLORS.length], visible: true,
+      vec: v, color: COLORS[i % COLORS.length] ?? '#4fc3f7', visible: true,
     }));
     // auto-fit x
     const xs = xVec.data;
     this.vx0 = xs[0] ?? 0;
-    this.vx1 = xs[xs.length - 1] ?? 1;
+    this.vx1 = (xs.length > 0 ? xs[xs.length - 1] : undefined) ?? 1;
     this.autofitY();
     this.buildNodeSel();
     this.buildLegend();
@@ -181,8 +189,8 @@ export class WaveformViewer {
       if (!t.visible || !t.vec.data.length) continue;
       const pts: string[] = [];
       for (let i = 0; i < this.xVec.data.length && i < t.vec.data.length; i++) {
-        const sx = this.toSx(this.xVec.data[i]);
-        const sy = this.toSy(t.vec.data[i]);
+        const sx = this.toSx(this.xVec.data[i] ?? 0);
+        const sy = this.toSy(t.vec.data[i] ?? 0);
         pts.push(`${i === 0 ? 'M' : 'L'}${sx.toFixed(2)},${sy.toFixed(2)}`);
       }
       const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');

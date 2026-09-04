@@ -6,13 +6,14 @@
 import { createSimControls, SimParams } from './sim-controls.js';
 import { WaveformViewer } from './waveform-viewer.js';
 
-const BACKEND = (import.meta as Record<string, unknown> & { env: Record<string, string> }).env.VITE_SIM_BACKEND ?? 'http://localhost:8000';
+const BACKEND = (import.meta as unknown as { env: Record<string, string> }).env?.VITE_SIM_BACKEND ?? 'http://localhost:8000';
 
 // Cross-tab netlist bus
 const NETLIST_KEY = 'weave-sim-netlist-v1';
 
 export function initSimulator(root: HTMLElement): void {
   root.innerHTML = '';
+  root.removeAttribute('style');
   root.className = 'sc3-root';
 
   // ── layout ────────────────────────────────────────────────────────────────
@@ -168,6 +169,7 @@ export function initSimulator(root: HTMLElement): void {
       }
 
       const xVec = data.vectors.find(v => v.name === data.x_var) ?? data.vectors[0];
+      if (!xVec) { statusEl.textContent = 'No vectors returned'; statusEl.className = 'sc3-status warn'; return; }
       const yVecs = data.vectors.filter(v => v.name !== xVec.name);
 
       viewer.load(xVec, yVecs);

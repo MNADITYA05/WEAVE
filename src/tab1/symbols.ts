@@ -38,6 +38,10 @@ export const PREFIX2SYM: Record<string, string> = {
  * Resolves when both symtable.json and sym-draw.json have been fetched and
  * all symbol exports are populated. Await this before calling any conversion.
  */
+let NAME2SYM:  Record<string, string> | null = null;
+let MODEL2SYM: Record<string, string> | null = null;
+let CARD2SYM:  Record<string, string> | null = null;
+
 export const symbolsReady: Promise<void> = (async (): Promise<void> => {
   const [symtable, symDraw] = await Promise.all([
     fetch('data/symtable.json').then(r => r.json() as Promise<Record<string, SymbolDef & { retired?: boolean }>>),
@@ -127,9 +131,7 @@ export function blockAsyFiles(asc: string): Record<string, string> {
 
 // ─── Symbol resolution ────────────────────────────────────────────────────────
 
-let NAME2SYM:  Record<string, string> | null = null;
-let MODEL2SYM: Record<string, string> | null = null;
-let CARD2SYM:  Record<string, string> | null = null;
+
 
 /** Builds the three resolution maps lazily (called once on first resolveSub). */
 export function buildResolveMaps(): void {

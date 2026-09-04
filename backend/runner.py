@@ -51,10 +51,16 @@ def _ensure_control(netlist: str, sim_type: str, params: dict) -> str:
 
 def _inject_save_raw(netlist: str, raw_path: str) -> str:
     cleaned = re.sub(r"(?im)^\s*write\s+\S+\s*$", "", netlist)
+    ctrl_block = f".control\nrun\nset filetype=ascii\nwrite {raw_path}\n.endc"
     if ".endc" in cleaned.lower():
+        # already has control block — inject write before .endc
         cleaned = re.sub(r"(?im)(\.endc)", f"write {raw_path}\n\\1", cleaned, count=1)
+    elif re.search(r"(?im)^\.end\s*$", cleaned):
+        # has .end but no .control — insert control block before .end
+        cleaned = re.sub(r"(?im)(^\.end\s*$)", f"{ctrl_block}\n\\1", cleaned, count=1)
     else:
-        cleaned = cleaned.rstrip() + f"\nwrite {raw_path}\n"
+        # no .end at all — append control block
+        cleaned = cleaned.rstrip() + f"\n{ctrl_block}\n"
     return cleaned
 
 

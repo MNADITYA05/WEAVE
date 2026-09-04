@@ -60,9 +60,10 @@
 }
 /* waveform */
 .sc3-waveform-root {
-  display: flex; flex-direction: column; height: 100%; overflow: hidden;
+  display: flex; flex-direction: column; flex: 1; min-height: 300px; overflow: hidden;
 }
-.sc3-wave-svg { flex: 1; }
+.sc3-wave-wrap { position: relative; flex: 1; min-height: 300px; }
+.sc3-wave-svg { display: block; }
 .sc3-axis-label { font-size: 10px; fill: #888; }
 .sc3-axis-border { stroke: #555; stroke-width: 1; }
 .sc3-grid { stroke: #2a2a2a; stroke-width: 1; }

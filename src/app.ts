@@ -26,7 +26,7 @@ import { ParseError, SymbolError, LayoutError, RoutingError, WeaveError } from '
 declare const ELK: new () => unknown;
 
 const APP_VERSION = '5.0';
-const SIM_BACKEND: string = (import.meta as Record<string, unknown> & { env: Record<string, string> }).env?.VITE_SIM_BACKEND ?? 'http://localhost:8000';
+const SIM_BACKEND: string = (import.meta as unknown as { env: Record<string, string> }).env?.VITE_SIM_BACKEND ?? 'http://localhost:8000';
 
 // ─── Tab switching ────────────────────────────────────────────────────────────
 

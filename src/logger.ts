@@ -25,7 +25,7 @@ function emit(level: LogLevel, msg: string): void {
     logger.onEmit(level, msg);
   } else {
     // Fallback: write to browser console when no sink is registered
-    (console as Record<string, (...a: unknown[]) => void>)[level]?.(msg) ?? console.log(msg);
+    (console as unknown as Record<string, (...a: unknown[]) => void>)[level]?.(msg) ?? console.log(msg);
   }
 }
 
