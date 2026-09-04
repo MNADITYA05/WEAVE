@@ -28,11 +28,8 @@ import type {
 import { isFlag } from './classifier.js';
 
 // SYMBOLS is a 1.6 MB browser global loaded via classic <script> tag.
-declare const SYMBOLS: Record<string, {
-  pins: Point[];
-  bbox: BBox;
-  synthetic?: boolean;
-}>;
+import { SYMBOLS } from './symbols.js';
+import { SymbolError } from '../errors.js';
 
 // ─── netDepths ────────────────────────────────────────────────────────────────
 
@@ -159,8 +156,8 @@ export function chooseRotation(
   if (isFlag(tA) && isFlag(tB))  return 'R0';    // both flags (bypass/decoupling)
 
   // Series element: rotate horizontal, lower-depth net on the left
-  const dA = depth.get(c.nets[0]!) ?? depth.get(c.nets[1]!) ?? 99;
-  const dB = depth.get(c.nets[1]!) ?? depth.get(c.nets[0]!) ?? 99;
+  const dA = depth.get(c.nets[0]!) ?? 99;
+  const dB = depth.get(c.nets[1]!) ?? 99;
   // R270: pin1→top-left, pin2→top-right  ⟹  pin1 is on the left
   // R90:  pin1→top-right, pin2→top-left  ⟹  pin2 is on the left
   return dA <= dB ? 'R270' : 'R90';
@@ -197,7 +194,7 @@ export function decorateComponents(
 ): DecoratedComponent[] {
   return comps.map(c => {
     const S = SYMBOLS[c.sym];
-    if (!S) throw new Error(`no symbol for ${c.name}`);
+    if (!S) throw new SymbolError(`no symbol for ${c.name}`);
 
     // ── opamp detection ─────────────────────────────────────────────────────
     const isOp = detectOp(S.pins);

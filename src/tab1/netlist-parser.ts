@@ -22,12 +22,9 @@
  */
 
 import type { ParsedNetlist, ParsedComponent } from '../types.js';
-
-// These are declared as ambient globals in the browser environment via
-// classic <script> tags. TypeScript sees them through the shim below.
-declare const PREFIX2SYM: Record<string, string>;
-declare const SYMBOLS: Record<string, { pins: [number, number][]; bbox: [number, number, number, number]; ord?: number[]; }>;
-declare function resolveSub(sub: string, pinCount: number, params: string): string | undefined;
+import { logger } from '../logger.js';
+import { SYMBOLS, PREFIX2SYM, resolveSub } from './symbols.js';
+import { ParseError, SymbolError } from '../errors.js';
 
 // ─── Polarity inference regexes (BJT / MOSFET) ───────────────────────────────
 
@@ -82,7 +79,7 @@ export function parseNetlist(text: string): ParsedNetlist {
     // Lines inside an inline .subckt body belong to the model definition.
     // Keep them as directives so the emitted schematic stays simulatable.
     if (insub > 0) {
-      console.info(`netlist-parser: skipping subckt body line (insub=${insub}): ${ln}`);
+      logger.debug(`netlist-parser: skipping subckt body line (insub=${insub}): ${ln}`);
       directives.push(ln);
       continue;
     }
@@ -130,7 +127,7 @@ export function parseNetlist(text: string): ParsedNetlist {
         if (!body[z]!.includes('=')) { mi = z; break; }
       }
       if (mi < 0 || body.length < 9) {
-        throw new Error(`${name}: A-device model token missing`);
+        throw new ParseError(`${name}: A-device model token missing`);
       }
       const nodes8 = body.slice(0, 8) as string[];
       const model = body[mi]!;
@@ -141,7 +138,7 @@ export function parseNetlist(text: string): ParsedNetlist {
         (SYMBOLS['Digital\\' + q]            ? 'Digital\\' + q            : null) ??
         (SYMBOLS['SpecialFunctions\\' + q]   ? 'SpecialFunctions\\' + q   : null);
       if (!sym || !SYMBOLS[sym] || !SYMBOLS[sym]!.ord) {
-        throw new Error(`${name}: A-device symbol ${model} not in table`);
+        throw new SymbolError(`${name}: A-device symbol ${model} not in table`);
       }
       const nets = SYMBOLS[sym]!.ord!.map(o => nodes8[o - 1]!);
       comps.push({ name, sym, nets, value: model + ' ' + body.slice(mi + 1).join(' ') });
@@ -153,7 +150,7 @@ export function parseNetlist(text: string): ParsedNetlist {
       } else {
         const model = tok[tok.length - 1]!;
         const nets = tok.slice(1, tok.length - 1) as string[];
-        if (nets.length !== 3) throw new Error(`${name}: JFET expects 3 nodes`);
+        if (nets.length !== 3) throw new ParseError(`${name}: JFET expects 3 nodes`);
         const sym = /^p|pjf|2n54|lsj/i.test(model) ? 'pjf' : 'njf';
         comps.push({ name, sym, nets, value: model });
       }
@@ -174,21 +171,21 @@ export function parseNetlist(text: string): ParsedNetlist {
       const model = tok[te]!;
       const nodes = tok.slice(1, te) as string[];
       if (nodes.length !== 3 && nodes.length !== 4) {
-        throw new Error(`${name}: expected 3 or 4 nodes, got ${nodes.length}`);
+        throw new ParseError(`${name}: expected 3 or 4 nodes, got ${nodes.length}`);
       }
 
       let base: string;
       if (P === 'Q') {
         if      (PNP.test(model)) base = 'pnp';
         else if (NPN.test(model)) base = 'npn';
-        else throw new Error(
+        else throw new SymbolError(
           `${name}: cannot determine BJT polarity from model name "${model}" ` +
           `— model name must match a known NPN or PNP part`
         );
       } else {
         if      (PMOS.test(model)) base = 'pmos';
         else if (NMOS.test(model)) base = 'nmos';
-        else throw new Error(
+        else throw new SymbolError(
           `${name}: cannot determine MOSFET polarity from model name "${model}" ` +
           `— model name must match a known NMOS or PMOS part`
         );
@@ -201,11 +198,12 @@ export function parseNetlist(text: string): ParsedNetlist {
         nodes.length === 4 &&
         ((P === 'Q' && nodes[3] === '0') || (P === 'M' && nodes[3] === nodes[2]))
       ) {
+        logger.warn(`${name}: 4th bulk/substrate node "${nodes[3]!}" dropped — collapsed to 3-pin symbol`);
         use = nodes.slice(0, 3);
       }
 
       const sym = base + (use.length === 4 ? '4' : '');
-      if (!SYMBOLS[sym]) throw new Error(`${name}: no symbol ${sym}`);
+      if (!SYMBOLS[sym]) throw new SymbolError(`${name}: no symbol ${sym}`);
       comps.push({ name, sym, nets: use, value: model });
 
     } else {
@@ -218,13 +216,13 @@ export function parseNetlist(text: string): ParsedNetlist {
 
       const sym = resolveSub(sub, nets.length, params);
       if (!sym) {
-        throw new Error(
+        throw new SymbolError(
           `${name}: unknown subckt "${sub}" with ${nets.length} pins ` +
           `— add it to symtable or define a .subckt body`
         );
       }
       if (SYMBOLS[sym]!.pins.length !== nets.length) {
-        throw new Error(
+        throw new SymbolError(
           `${name}: "${sub}" symbol has ${SYMBOLS[sym]!.pins.length} pins, ` +
           `netlist gives ${nets.length}`
         );

@@ -26,7 +26,7 @@ import type {
 } from '../types.js';
 import { isFlag } from './classifier.js';
 
-declare const SYMBOLS: Record<string, { pins: unknown[]; synthetic?: boolean }>;
+import { SYMBOLS } from './symbols.js';
 
 /** Options forwarded from convert(). */
 export interface LayoutOpts {

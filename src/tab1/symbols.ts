@@ -7,25 +7,51 @@
 
 import type { SymbolDef } from '../types.js';
 
-// SYMTABLE is loaded via <script src="data/symtable.js"> before this module.
-declare const SYMTABLE: Record<string, SymbolDef & { retired?: boolean }>;
+// ─── Mutable symbol-table exports (populated by symbolsReady) ─────────────────
 
-// ─── Symbol table ─────────────────────────────────────────────────────────────
+/** Full LTspice symbol table — populated after symbolsReady resolves. */
+export let SYMBOLS:    Record<string, SymbolDef & { retired?: boolean }> = {};
 
-/** Alias for the global SYMTABLE. All symbol lookups go through here. */
-export const SYMBOLS: Record<string, SymbolDef & { retired?: boolean }> = SYMTABLE;
+/** SVG draw commands per symbol key — populated after symbolsReady resolves. */
+export let SYM_DRAW:   Record<string, {
+  draw?: Array<{
+    t: 'l' | 'e' | 'r' | 'a';
+    x1?: number; y1?: number; x2?: number; y2?: number;
+    cx?: number; cy?: number; rx?: number; ry?: number;
+    x?: number;  y?: number;  w?: number;  h?: number;
+    large?: number; sweep?: number;
+  }>;
+  pins?: Array<{ x: number; y: number }>;
+}> = {};
 
-/** X subckt name → symbol key (case-insensitive on the .asy base name). */
-export const SUBCKT2SYM: Record<string, string> = {};
-for (const k of Object.keys(SYMBOLS)) {
-  const base = k.split('\\').pop();
-  if (base) SUBCKT2SYM[base.toLowerCase()] = k;
-}
+/** X subckt name → symbol key (case-insensitive on .asy base name). */
+export let SUBCKT2SYM: Record<string, string> = {};
 
 /** SPICE element prefix → default symbol key. */
 export const PREFIX2SYM: Record<string, string> = {
   R: 'res', C: 'cap', L: 'ind', V: 'voltage', I: 'current', D: 'diode',
 };
+
+// ─── Async loader ─────────────────────────────────────────────────────────────
+
+/**
+ * Resolves when both symtable.json and sym-draw.json have been fetched and
+ * all symbol exports are populated. Await this before calling any conversion.
+ */
+export const symbolsReady: Promise<void> = (async (): Promise<void> => {
+  const [symtable, symDraw] = await Promise.all([
+    fetch('data/symtable.json').then(r => r.json() as Promise<Record<string, SymbolDef & { retired?: boolean }>>),
+    fetch('data/sym-draw.json').then(r => r.json() as Promise<typeof SYM_DRAW>),
+  ]);
+  SYMBOLS  = symtable;
+  SYM_DRAW = symDraw;
+  for (const k of Object.keys(SYMBOLS)) {
+    const base = k.split('\\').pop();
+    if (base) SUBCKT2SYM[base.toLowerCase()] = k;
+  }
+  // Reset lazy resolve maps so they are rebuilt from the fresh SYMBOLS table.
+  NAME2SYM = null; MODEL2SYM = null; CARD2SYM = null;
+})();
 
 // ─── Synthetic rectangular block ──────────────────────────────────────────────
 

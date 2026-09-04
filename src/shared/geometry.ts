@@ -7,6 +7,7 @@
  */
 
 import type { Point, BBox, RotCode } from '../types.js';
+import { LayoutError } from '../errors.js';
 
 /** LTspice schematic grid size in pixels/units. All coordinates are multiples of this. */
 export const GRID = 16 as const;
@@ -30,7 +31,7 @@ export function rot([x, y]: Point, code: RotCode): Point {
   if (k === 90)  return [-y, rx];
   if (k === 180) return [-rx, -y];
   if (k === 270) return [y, -rx];
-  throw new Error(`rot: invalid rotation code "${code}"`);
+  throw new LayoutError(`rot: invalid rotation code "${code}"`);
 }
 
 /**

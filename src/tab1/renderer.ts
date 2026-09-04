@@ -12,26 +12,8 @@
 
 import { rot, ROT_MAT, _svgMat } from '../shared/geometry.js';
 import { NOROT } from './orientation.js';
+import { SYMBOLS, SYM_DRAW } from './symbols.js';
 import type { RotCode } from '../types.js';
-
-// ─── Browser globals ──────────────────────────────────────────────────────────
-declare const SYMBOLS: Record<string, {
-  pins:    [number, number][];
-  bbox:    [number, number, number, number];
-  windows?: Record<string, [number, number, string]>;
-  attrs?:  Record<string, string | undefined>;
-}>;
-
-declare const SYM_DRAW: Record<string, {
-  draw?: Array<{
-    t: 'l' | 'e' | 'r' | 'a';
-    x1?: number; y1?: number; x2?: number; y2?: number;
-    cx?: number; cy?: number; rx?: number; ry?: number;
-    x?: number;  y?: number;  w?: number;  h?: number;
-    large?: number; sweep?: number;
-  }>;
-  pins?: Array<{ x: number; y: number }>;
-}>;
 
 // ─── Internal types ───────────────────────────────────────────────────────────
 

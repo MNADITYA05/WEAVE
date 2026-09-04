@@ -16,7 +16,8 @@ import { parseNetlist } from './netlist-parser.js';
 import { classifyNets, isFlag, railLabel } from './classifier.js';
 
 // ─── Browser globals (script-tag loaded, not bundled) ────────────────────────
-declare const SYMBOLS: Record<string, { pins: [number, number][]; bbox: [number, number, number, number] }>;
+import { SYMBOLS } from './symbols.js';
+import { SymbolError } from '../errors.js';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -66,7 +67,7 @@ export function connectivity(asc: string): NetMap {
 
   for (const s of syms) {
     const S = SYMBOLS[s.sym];
-    if (!S) throw new Error('unknown symbol in asc: ' + s.sym);
+    if (!S) throw new SymbolError('unknown symbol in asc: ' + s.sym);
     S.pins.forEach((p, i) => {
       const rp = rot(p, s.rot as RotCode);
       const abs: [number, number] = [s.x + rp[0], s.y + rp[1]];

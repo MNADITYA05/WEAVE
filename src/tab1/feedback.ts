@@ -42,7 +42,7 @@ import type {
 } from '../types.js';
 import { isFlag } from './classifier.js';
 
-declare const SYMBOLS: Record<string, { pins: Point[]; bbox: BBox }>;
+import { SYMBOLS } from './symbols.js';
 
 /** Options controlling which feedback passes run. */
 export interface FeedbackOpts {
@@ -195,7 +195,7 @@ export function classifyFeedback(
   // ── Pass 3: divider leg (isLeg) ──────────────────────────────────────────
   if (!opts.noLeg) {
     for (const c of annotated) {
-      if (c.isFb || c.nets.length !== 2 || c.isOp) continue;
+      if (c.isFb || c.isFar || c.nets.length !== 2 || c.isOp) continue;
       const flagIdx = ([0, 1] as const).find(i => isFlag(cls.get(c.nets[i]!)));
       if (flagIdx === undefined) continue;
       const sigNet = c.nets[1 - flagIdx]!;
@@ -233,7 +233,7 @@ export function classifyFeedback(
   // ── Pass 4: hangable shunt (isHang) ──────────────────────────────────────
   if (!opts.noHang) {
     for (const c of annotated) {
-      if (c.isFb || c.isLeg || c.nets.length !== 2 || c.isOp) continue;
+      if (c.isFb || c.isFar || c.isLeg || c.nets.length !== 2 || c.isOp) continue;
       if (c.sym === 'voltage' || c.sym === 'current') continue;
       const flagIdx = ([0, 1] as const).find(i => isFlag(cls.get(c.nets[i]!)));
       if (flagIdx === undefined) continue;
@@ -244,7 +244,7 @@ export function classifyFeedback(
         o => o !== c && o.inGraph && !o.isFb && !o.isLeg && o.nets.includes(sigNet)
       ).length;
 
-      if (othersOnNet >= 1) {
+      if (othersOnNet >= 2) {
         const ac = byName.get(c.name)!;
         Object.assign(ac, { isHang: true, hangNet: sigNet, inGraph: false });
       }

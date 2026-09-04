@@ -9,6 +9,7 @@
 
 import { GRID } from '../shared/geometry.js';
 import type { BBox, Point } from '../types.js';
+import { LayoutError } from '../errors.js';
 
 // Mutable shape of a placed component during the post-layout / collision phase.
 interface RepairComp {
@@ -94,6 +95,6 @@ export function resolveCollisions(comps: RepairComp[]): void {
     const who = pa
       ? `"${pa.name ?? '?'}" and "${pb?.name ?? '?'}" at origin (${pa.origin}) vs (${pb?.origin})`
       : '(pair unidentified)';
-    throw new Error(`resolveCollisions: still overlapping after 500 iterations — ${who}`);
+    throw new LayoutError(`resolveCollisions: still overlapping after 500 iterations — ${who}`);
   }
 }

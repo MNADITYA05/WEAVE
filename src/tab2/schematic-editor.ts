@@ -11,7 +11,7 @@ import { UF } from '../shared/union-find.js';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type RotCode = 'R0' | 'R90' | 'R180' | 'R270';
+type RotCode = 'R0' | 'R90' | 'R180' | 'R270' | 'MR0' | 'MR90' | 'MR180' | 'MR270';
 
 interface CompExtra {
   model?: string;
@@ -65,7 +65,7 @@ const snap = (v: number): number => Math.round(v / GRID) * GRID;
 function rotPt([x, y]: [number, number], code: RotCode): [number, number] {
   let rx = x;
   if (code[0] === 'M') rx = -rx;
-  const k = parseInt(code.slice(1), 10);
+  const k = parseInt(code.replace(/^M?R/, ''), 10) || 0;
   if (k === 0)   return [rx, y];
   if (k === 90)  return [-y, rx];
   if (k === 180) return [-rx, -y];
@@ -74,12 +74,24 @@ function rotPt([x, y]: [number, number], code: RotCode): [number, number] {
 }
 
 function nextRot(code: RotCode): RotCode {
-  const seq: RotCode[] = ['R0', 'R90', 'R180', 'R270'];
-  return seq[(seq.indexOf(code) + 1) % 4]!;
+  const mirrored = code.startsWith('M');
+  const base = mirrored ? code.slice(1) : code;
+  const seq = ['R0', 'R90', 'R180', 'R270'];
+  const next = seq[(seq.indexOf(base) + 1) % 4]!;
+  return (mirrored ? 'M' + next : next) as RotCode;
+}
+
+function toggleMirror(code: RotCode): RotCode {
+  return (code.startsWith('M') ? code.slice(1) : 'M' + code) as RotCode;
 }
 
 function svgAng(rotCode: RotCode): number {
-  return -parseInt(rotCode.replace(/^M/, '').slice(1) || '0', 10);
+  return -parseInt(rotCode.replace(/^M?R/, '') || '0', 10);
+}
+function svgTransform(rotCode: RotCode): string {
+  const mirror = rotCode[0] === 'M';
+  const ang = svgAng(rotCode);
+  return mirror ? `rotate(${ang}) scale(-1,1)` : `rotate(${ang})`;
 }
 
 // ─── State ────────────────────────────────────────────────────────────────────
@@ -205,7 +217,7 @@ function buildHTML(): string {
     </div>
   </div>
 </div>
-<div id="sc-hintbar"><span id="sc-hint-txt">Click palette &#8594; place &middot; W=wire &middot; Esc=select &middot; R=rotate &middot; Del=delete</span></div>
+<div id="sc-hintbar"><span id="sc-hint-txt">Click palette &#8594; place &middot; W=wire &middot; Esc=select &middot; R=rotate &middot; M=mirror &middot; Del=delete</span></div>
 </div>`;
 }
 
@@ -238,18 +250,19 @@ function enterPlace(type: string): void {
   document.querySelectorAll<HTMLButtonElement>('.sc-pb').forEach(b =>
     b.classList.toggle('sc-active', b.dataset['type'] === type));
   svgEl.style.cursor = 'crosshair';
-  updateHint(`Placing ${SYMDEFS[type]?.label ?? type} — Left-click to place, Right-click/R to rotate, Esc to cancel`);
+  updateHint(`Placing ${SYMDEFS[type]?.label ?? type} — Left-click to place · R=rotate · M=mirror · Right-click=rotate · Esc=cancel`);
   renderGhost();
 }
 
 function enterSelect(): void {
-  S.mode = 'select'; S.placing = null; S.wireStart = null;
+  S.mode = 'select'; S.placing = null; S.wireStart = null; S.sel = null;
   document.getElementById('sc-btn-sel')!.classList.add('sc-active');
   document.getElementById('sc-btn-wire')!.classList.remove('sc-active');
   document.querySelectorAll<HTMLButtonElement>('.sc-pb').forEach(b => b.classList.remove('sc-active'));
   svgEl.style.cursor = 'default';
   ghostL.innerHTML = '';
-  updateHint('Click to select &middot; Drag to move &middot; W=wire &middot; R=rotate selected &middot; Del=delete');
+  showProps(null);
+  updateHint('Click to select &middot; W=wire &middot; R=rotate &middot; M=mirror &middot; Del=delete');
   render();
 }
 
@@ -304,7 +317,7 @@ function defaultValue(type: string): string {
 
 // ─── Junction detection ───────────────────────────────────────────────────────
 
-function detectJunctions(): void {
+function computeEditorJunctions(): void {
   const cnt = new Map<string, number>();
   const bump = (k: string): void => { cnt.set(k, (cnt.get(k) ?? 0) + 1); };
   for (const w of S.wires) { bump(w.x1 + ',' + w.y1); bump(w.x2 + ',' + w.y2); }
@@ -332,7 +345,7 @@ function detectJunctions(): void {
 
 function render(): void {
   pzEl.setAttribute('transform', `translate(${S.pan.x},${S.pan.y}) scale(${S.zoom})`);
-  detectJunctions();
+  computeEditorJunctions();
 
   wireL.innerHTML = S.wires.map(w =>
     `<line id="scw-${w.id}" data-wid="${w.id}"
@@ -344,10 +357,9 @@ function render(): void {
   for (const c of S.comps) {
     const def: SymDef | undefined = SYMDEFS[c.type];
     if (!def) continue;
-    const ang    = svgAng(c.rot);
     const isSel  = c.id === S.sel;
     const stroke = isSel ? '#1a7fd4' : '#1a1a1a';
-    csvg += `<g id="scc-${c.id}" data-cid="${c.id}" transform="translate(${c.x},${c.y}) rotate(${ang})" style="cursor:pointer">`;
+    csvg += `<g id="scc-${c.id}" data-cid="${c.id}" transform="translate(${c.x},${c.y}) ${svgTransform(c.rot)}" style="cursor:pointer">`;
     if (isSel) csvg += `<rect x="-38" y="-44" width="76" height="88" fill="#1a7fd440" stroke="#1a7fd4" stroke-width="1" rx="3" stroke-dasharray="4,2"/>`;
     csvg += `<g stroke="${stroke}" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" color="${stroke}">`;
     csvg += def.svg;
@@ -373,9 +385,8 @@ function renderGhost(): void {
   if (S.mode !== 'place' || !S.placing) { ghostL.innerHTML = ''; return; }
   const def: SymDef | undefined = SYMDEFS[S.placing];
   if (!def) return;
-  const ang = svgAng(S.placingRot);
   const { x, y } = S.mouse;
-  ghostL.innerHTML = `<g transform="translate(${x},${y}) rotate(${ang})" opacity="0.55">
+  ghostL.innerHTML = `<g transform="translate(${x},${y}) ${svgTransform(S.placingRot)}" opacity="0.55">
 <g stroke="#1a7fd4" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" color="#1a7fd4">
 ${def.svg}</g>
 ${def.pins.map(([px, py]) => `<circle cx="${px}" cy="${py}" r="3" fill="#1a7fd4" stroke="none"/>`).join('')}
@@ -416,6 +427,7 @@ function showProps(comp: Comp | null): void {
 <div style="color:#aaa;font-size:11px;font-family:monospace">${comp.rot}</div></div>`;
   h += `<div class="sc-pbs">
 <button class="sc-pbtn" id="pi-rot">&#8635; Rotate</button>
+<button class="sc-pbtn" id="pi-mir">&#8596; Mirror</button>
 <button class="sc-pbtn del" id="pi-del">&#10005; Delete</button></div>`;
   propsBodyEl.innerHTML = h;
 
@@ -427,6 +439,8 @@ function showProps(comp: Comp | null): void {
   if (mi) mi.addEventListener('input', e => { comp.extra.model = (e.target as HTMLInputElement).value; });
   propsBodyEl.querySelector<HTMLButtonElement>('#pi-rot')!
     .addEventListener('click', () => { comp.rot = nextRot(comp.rot); render(); showProps(comp); });
+  propsBodyEl.querySelector<HTMLButtonElement>('#pi-mir')!
+    .addEventListener('click', () => { comp.rot = toggleMirror(comp.rot); render(); showProps(comp); });
   propsBodyEl.querySelector<HTMLButtonElement>('#pi-del')!
     .addEventListener('click', () => deleteSelected());
 }
@@ -495,7 +509,8 @@ function generateNetlist(): string {
     else if (pfx === 'B')          line = `${name} ${nets[0]} ${nets[1]} ${val}`;
     else if (pfx === 'X')          line = `${name} ${nets.join(' ')} ${model}`;
     else if (pfx === 'K')          line = `${name} ${c.extra?.L1 ?? 'L1'} ${c.extra?.L2 ?? 'L2'} ${val}`;
-    else if ('SW'.includes(pfx))   line = `${name} ${nets[0]} ${nets[1]} ${model}`;
+    else if (pfx === 'S')           line = `${name} ${nets[0]} ${nets[1]} ${nets[2] ?? '?'} ${nets[3] ?? '?'} ${model}`;
+    else if (pfx === 'W')           line = `${name} ${nets[0]} ${nets[1]} ${c.extra?.csrc ?? 'VSRC'} ${model}`;
     else if (pfx === 'T')          line = `${name} ${nets[0]} ${nets[1]} ${nets[2] ?? '?'} ${nets[3] ?? '?'} ${val}`;
     else                           line = `${name} ${nets.join(' ')} ${val}`;
     lines.push(line);
@@ -574,7 +589,8 @@ function bindEvents(root: HTMLElement): void {
       e.preventDefault(); _panDrag = { lx: e.clientX, ly: e.clientY };
     }
   });
-  window.addEventListener('mouseup', () => { _panDrag = null; });
+  function _onWindowMouseUp(): void { _panDrag = null; }
+  window.addEventListener('mouseup', _onWindowMouseUp);
 
   svgEl.addEventListener('wheel', e => {
     e.preventDefault();
@@ -599,6 +615,13 @@ function bindEvents(root: HTMLElement): void {
       else if (S.sel) {
         const c = S.comps.find(c => c.id === S.sel);
         if (c) { c.rot = nextRot(c.rot); render(); showProps(c); }
+      }
+    }
+    else if (e.key === 'm' || e.key === 'M') {
+      if (S.mode === 'place') { S.placingRot = toggleMirror(S.placingRot); renderGhost(); }
+      else if (S.sel) {
+        const c = S.comps.find(c => c.id === S.sel);
+        if (c) { c.rot = toggleMirror(c.rot); render(); showProps(c); }
       }
     }
   });

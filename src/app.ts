@@ -14,12 +14,14 @@ import { parseNetlist }              from './tab1/netlist-parser.js';
 import { setAscView, renderSchematic } from './tab1/renderer.js';
 import { mergeWires, detectJunctions,
          _mergeWires, _detectJunctions } from './tab1/wire-merge.js';
+import { symbolsReady, SYMBOLS }     from './tab1/symbols.js';
 
 // @ts-ignore — Tab 2 editor not yet migrated
 import { initEditor }   from './tab2/schematic-editor.js';
+import { logger }                            from './logger.js';
+import { ParseError, SymbolError, LayoutError, RoutingError, WeaveError } from './errors.js';
 
 // Browser globals
-declare const SYMBOLS: Record<string, unknown>;
 declare const ELK: new () => unknown;
 
 const APP_VERSION = '5.0';
@@ -45,6 +47,12 @@ function clogId(id: string, msg: string, cls?: string): void {
   c.scrollTop = c.scrollHeight;
 }
 function clog(msg: string, cls?: string): void { clogId('console',  msg, cls); }
+
+// Route pipeline logger output into the UI console pane
+logger.onEmit = (level, msg): void => {
+  const cls = level === 'warn' ? 'warn' : level === 'error' ? 'err' : level === 'debug' ? 'dim' : undefined;
+  clog(msg, cls);
+};
 
 // ─── Examples ────────────────────────────────────────────────────────────────
 
@@ -138,13 +146,21 @@ async function run(): Promise<void> {
       clog(`MATCH — ${nSym} symbols, ${nWire} wires, connectivity verified`, 'ok');
     }
   } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    status.textContent = 'error: ' + msg;
+    let msg = e instanceof Error ? e.message : String(e);
+    let prefix = 'error';
+    if (e instanceof ParseError)        { prefix = 'parse error'; }
+    else if (e instanceof SymbolError)  { prefix = 'symbol error'; }
+    else if (e instanceof LayoutError)  { prefix = 'layout error'; }
+    else if (e instanceof RoutingError) { prefix = 'routing error'; }
+    else if (!(e instanceof WeaveError)) {
+      logger.debug(e instanceof Error && e.stack ? e.stack : String(e));
+    }
+    status.textContent = prefix + ': ' + msg;
     status.className   = 'bad';
     info.textContent   = '';
     lastAsc = '';
     (document.getElementById('ascview') as HTMLElement).textContent = '';
-    clog('error: ' + msg, 'err');
+    clog(prefix + ': ' + msg, 'err');
   }
   (document.getElementById('dl') as HTMLButtonElement).disabled = !lastAsc;
 }
@@ -154,12 +170,7 @@ function download(): void {
   const d = new Date();
   const p2 = (n: number): string => String(n).padStart(2, '0');
   const stamp = d.getFullYear() + p2(d.getMonth() + 1) + p2(d.getDate()) + p2(d.getHours()) + p2(d.getMinutes());
-  const bytes = new Uint8Array(lastAsc.length);
-  for (let i = 0; i < lastAsc.length; i++) {
-    const c = lastAsc.charCodeAt(i);
-    bytes[i] = c < 256 ? c : 63;
-  }
-  const blob = new Blob([bytes], { type: 'application/octet-stream' });
+  const blob = new Blob([lastAsc.replace(/\n/g, '\r\n')], { type: 'application/octet-stream' });
   const a    = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'schematic_' + stamp + '.asc';
@@ -171,9 +182,7 @@ function download(): void {
     const win = window as Window & typeof globalThis & { blockAsyFiles: (asc: string) => Record<string, string> };
     const asys = win.blockAsyFiles(lastAsc);
     for (const [fn, body] of Object.entries(asys)) {
-      const ab = new Uint8Array(body.length);
-      for (let i = 0; i < body.length; i++) { const c = body.charCodeAt(i); ab[i] = c < 256 ? c : 63; }
-      const bb = new Blob([ab], { type: 'application/octet-stream' });
+      const bb = new Blob([body.replace(/\n/g, '\r\n')], { type: 'application/octet-stream' });
       const aa = document.createElement('a');
       aa.href = URL.createObjectURL(bb); aa.download = fn; aa.click();
       URL.revokeObjectURL(aa.href);
@@ -194,11 +203,17 @@ function download(): void {
 
 window.addEventListener('DOMContentLoaded', () => {
   initEditor(document.getElementById('sc-root')!);
+  (document.getElementById('ver') as HTMLElement).textContent = 'v' + APP_VERSION;
 
-  (document.getElementById('ver')  as HTMLElement).textContent = 'v' + APP_VERSION;
-  (document.getElementById('nsym') as HTMLElement).textContent = Object.keys(SYMBOLS).length + ' symbols loaded';
+  // Show loading state until symbol table is ready
+  const nsymEl  = document.getElementById('nsym') as HTMLElement;
+  const goBtn   = document.getElementById('go')   as HTMLButtonElement;
+  const dlBtn   = document.getElementById('dl')   as HTMLButtonElement;
+  const statusEl = document.getElementById('status') as HTMLElement;
+  nsymEl.textContent = 'Loading symbols…';
+  goBtn.disabled = true;
 
-  // Populate example selector
+  // Populate example selector (can happen before symbols load)
   const sel = document.getElementById('ex') as HTMLSelectElement;
   const optNew = document.createElement('option');
   optNew.textContent = 'New (clear)';
@@ -215,21 +230,29 @@ window.addEventListener('DOMContentLoaded', () => {
       (document.getElementById('nl')      as HTMLTextAreaElement).value = '';
       (document.getElementById('ascview') as HTMLElement).textContent  = '';
       (document.getElementById('info')    as HTMLElement).textContent  = '';
-      (document.getElementById('dl')      as HTMLButtonElement).disabled = true;
-      const st = document.getElementById('status') as HTMLElement;
-      st.textContent = ''; st.className = '';
+      dlBtn.disabled = true;
+      statusEl.textContent = ''; statusEl.className = '';
       return;
     }
     (document.getElementById('nl') as HTMLTextAreaElement).value = EXAMPLES[sel.value] ?? '';
     void run();
   };
 
-  sel.value = 'OP27 inverting amplifier';
-  (document.getElementById('nl') as HTMLTextAreaElement).value = EXAMPLES['OP27 inverting amplifier'] ?? '';
-  void run();
+  // Gate all symbol-dependent startup on the async loader
+  void symbolsReady.then(() => {
+    nsymEl.textContent = Object.keys(SYMBOLS).length + ' symbols loaded';
+    goBtn.disabled = false;
+    sel.value = 'OP27 inverting amplifier';
+    (document.getElementById('nl') as HTMLTextAreaElement).value = EXAMPLES['OP27 inverting amplifier'] ?? '';
+    void run();
+  }).catch((err: unknown) => {
+    nsymEl.textContent = 'Symbol load failed';
+    statusEl.textContent = String(err);
+    statusEl.className = 'err';
+  });
 
-  (document.getElementById('go') as HTMLButtonElement).onclick = () => void run();
-  (document.getElementById('dl') as HTMLButtonElement).onclick = download;
+  goBtn.onclick = () => void run();
+  dlBtn.onclick = download;
 
   let t1: ReturnType<typeof setTimeout>;
   (document.getElementById('nl') as HTMLTextAreaElement).addEventListener('input', () => {

@@ -13,6 +13,7 @@
 
 import type { NetClassMap, Point, WireSegment, FlagEntry } from '../types.js';
 import { railLabel } from './classifier.js';
+import { RoutingError } from '../errors.js';
 
 // Internal mutable component shape used during the routing / post-layout phase.
 // Only the fields actually accessed by these functions are listed.
@@ -70,7 +71,7 @@ export function fixFlagDirs(
         if (ok) { c.flagDir![i] = d; flagPlaced = true; return; }
       }
       if (!flagPlaced) {
-        throw new Error(`${c.name}: no clear direction for flag pin ${i} — all 4 directions blocked`);
+        throw new RoutingError(`${c.name}: no clear direction for flag pin ${i} — all 4 directions blocked`);
       }
     });
   }
@@ -92,7 +93,7 @@ export function emitFlags(
     c.nets.forEach((n, i) => {
       const t = cls.get(n);
       if (t !== 'gnd' && t !== 'rail') return;
-      if (!c.abs) throw new Error(`${c.name}: component was never placed (internal)`);
+      if (!c.abs) throw new RoutingError(`${c.name}: component was never placed (internal)`);
       const [px, py] = c.abs[i]!;
       const label = t === 'gnd' ? '0' : railLabel(n, comps as any);
       if (c.isLeg) {

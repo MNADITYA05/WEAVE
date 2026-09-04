@@ -4,44 +4,37 @@
  * Pipeline:
  *   parseNetlist → classifyNets → netDepths → decorateComponents
  *   → classifyFeedback → buildElkGraph → elk.layout → applyLayout
- *   → routeWires → repairNets → emitAsc → mergeWires → detectJunctions
+ *   → resolveCollisions → routeWires → repairNets → emitAsc
+ *   → mergeWires → detectJunctions
  *
  * ELK is injected via the IElk interface so the pipeline can run headless
  * (in tests) without a real ELK Web Worker.
  */
 
-import { GRID, snap, rot, rotBBox } from '../shared/geometry.js';
+import { _detectTopologies, _applyTopologyHints } from '../shared/topology.js';
 import { parseNetlist } from './netlist-parser.js';
-import { classifyNets, isFlag } from './classifier.js';
+import { classifyNets } from './classifier.js';
 import { netDepths, decorateComponents } from './orientation.js';
 import { classifyFeedback } from './feedback.js';
 import { buildElkGraph } from './layout.js';
-import { _detectTopologies, _applyTopologyHints } from '../shared/topology.js';
+import { applyLayout } from './apply-layout.js';
+import { routeWires } from './router.js';
+import { resolveCollisions } from './place-repair.js';
+import { repairNets } from './net-repair.js';
 import { emitAsc } from './renderer.js';
 import { mergeWires, detectJunctions } from './wire-merge.js';
 
-// JS modules not yet migrated to TS — imported as-is
-// @ts-ignore
-import { routeWires }       from './router.js';
-// @ts-ignore
-import { resolveCollisions } from './place-repair.js';
-// @ts-ignore
-import { repairNets }        from './net-repair.js';
-
-import type { IElk, AnnotatedComponent } from '../types.js';
+import type { IElk, AnnotatedComponent, WireSegment, FlagEntry } from '../types.js';
 import type { LayoutOpts } from './layout.js';
 import type { FeedbackOpts } from './feedback.js';
+import { LayoutError } from '../errors.js';
+import { logger } from '../logger.js';
 
 // ─── Browser globals ──────────────────────────────────────────────────────────
 declare const ELK: new () => IElk & { terminateWorker?: () => void };
-declare const SYMBOLS: Record<string, {
-  pins: [number, number][];
-  bbox: [number, number, number, number];
-}>;
 
 // ─── ELK singleton ────────────────────────────────────────────────────────────
 // Reuse the Web Worker across calls; kill and recreate on timeout.
-// Stored on the convert function object so callers can pre-warm: convert._elk = new ELK()
 export let _elkInstance: (IElk & { terminateWorker?: () => void }) | null = null;
 
 // ─── ConvertOpts ─────────────────────────────────────────────────────────────
@@ -66,7 +59,7 @@ export async function convert(text: string, opts: ConvertOpts = {}): Promise<str
   // ── Stage 2: decorate (immutable — returns new DecoratedComponent[]) ────────
   const decorated = decorateComponents(rawComps, cls, depth);
 
-  // ── Stage 3: feedback classification ─────────────────────────────────────
+  // ── Stage 3: feedback classification ──────────────────────────────────────
   const fbOpts: FeedbackOpts = {};
   if (opts.noFb   !== undefined) fbOpts.noFb   = opts.noFb;
   if (opts.noFar  !== undefined) fbOpts.noFar  = opts.noFar;
@@ -89,13 +82,13 @@ export async function convert(text: string, opts: ConvertOpts = {}): Promise<str
   };
   const topos = _detectTopologies(netlObj);
   if (topos.length) {
-    console.log('Topologies detected:', topos.map((t: { type: string; nodes: readonly string[] }) => t.type + ':' + [...t.nodes].join('+')));
+    logger.debug('Topologies detected: ' + topos.map((t: { type: string; nodes: readonly string[] }) => t.type + ':' + [...t.nodes].join('+')).join(', '));
   }
   _applyTopologyHints(graph, topos);
 
   // ── Stage 6: ELK layout ───────────────────────────────────────────────────
   if (typeof ELK === 'undefined' && !opts.elk)
-    throw new Error('ELK layout engine not loaded — check that elk.js script tag executed before convert() was called');
+    throw new LayoutError('ELK layout engine not loaded — check that elk.js script tag executed before convert() was called');
 
   let elk: IElk & { terminateWorker?: () => void };
   if (opts.elk) {
@@ -116,79 +109,17 @@ export async function convert(text: string, opts: ConvertOpts = {}): Promise<str
   ]);
 
   // ── Stage 7: apply layout positions ──────────────────────────────────────
-  // Mutate annotated components with placed positions.
-  // (annotated is our own array — safe to mutate the placed fields)
-  const byName = new Map(annotated.map(c => [c.name, c]));
-
-  for (const n of out.children ?? []) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const c = byName.get(n.id) as any;
-    if (!c) continue;
-    c.x = snap(n.x); c.y = snap(n.y);
-    c.origin = [c.x - c.rbb[0], c.y - c.rbb[1]];
-    c.abs  = c.rpins.map((p: [number, number]) => [c.origin[0] + p[0], c.origin[1] + p[1]]);
-    c.tips = c.rtips.map((p: [number, number]) => [c.origin[0] + p[0], c.origin[1] + p[1]]);
-  }
-
-  // Nudge opamps to align with series feeder elements
-  for (const u of opamps.filter(u => u.inGraph)) {
-    for (const inIdx of [1, 0]) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const uc = u as any;
-      const pid = u.name + '.p' + inIdx;
-      const e = (out.edges ?? []).find((e: { targets: string[]; sources: string[] }) => e.targets[0] === pid);
-      if (!e) continue;
-      const src = annotated.find(c => c.inGraph && e.sources[0].startsWith(c.name + '.p'));
-      if (!src || src.nets.length !== 2) continue;
-      const si = +e.sources[0].split('.p')[1];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const sc = src as any;
-      const delta = sc.tips[si][1] - uc.tips[inIdx][1];
-      if (delta !== 0 && Math.abs(delta) <= 32 && delta % GRID === 0) {
-        uc.y += delta;
-        uc.origin = [uc.x - uc.rbb[0], uc.y - uc.rbb[1]];
-        uc.abs  = uc.rpins.map((p: [number, number]) => [uc.origin[0] + p[0], uc.origin[1] + p[1]]);
-        uc.tips = uc.rtips.map((p: [number, number]) => [uc.origin[0] + p[0], uc.origin[1] + p[1]]);
-      }
-      break;
-    }
-  }
-
-  // Series element Y-nudge: align series elements feeding opamp inputs
-  for (const u of opamps.filter(u => u.inGraph)) {
-    for (const inIdx of [0, 1]) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const uc = u as any;
-      if (!uc.tips?.[inIdx]) continue;
-      const inTip = uc.tips[inIdx];
-      const partner = annotated.find(c =>
-        c.inGraph && c.nets.length === 2 && !c.isOp &&
-        c.nets.includes(u.nets[inIdx] ?? ''),
-      );
-      if (!partner) continue;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const pc = partner as any;
-      const pi = partner.nets.indexOf(u.nets[inIdx] ?? '');
-      if (!pc.tips?.[pi]) continue;
-      const delta = pc.tips[pi][1] - inTip[1];
-      if (delta !== 0 && Math.abs(delta) <= 48 && delta % GRID === 0) {
-        pc.origin[1] -= delta;
-        pc.abs  = pc.rpins.map((p: [number, number]) => [pc.origin[0] + p[0], pc.origin[1] + p[1]]);
-        pc.tips = pc.rtips.map((p: [number, number]) => [pc.origin[0] + p[0], pc.origin[1] + p[1]]);
-        pc.y = pc.origin[1] + pc.rbb[1];
-      }
-    }
-  }
+  applyLayout(annotated, opamps, out);
 
   // ── Stage 8: collision repair & wire routing ──────────────────────────────
-  resolveCollisions(annotated as any);
-  const { wires: wiresRO, flags: flagsRO } = routeWires(annotated as any, opamps as any, out.edges ?? [], portId as any, bridges as any, cls, opts as any);
-  const wires = wiresRO as import('../types.js').WireSegment[];
-  const flags = flagsRO as import('../types.js').FlagEntry[];
-  repairNets(annotated as any, wires, flags, cls);
+  resolveCollisions(annotated as never);
+  const { wires: wiresRO, flags: flagsRO } = routeWires(annotated as never, opamps as never, out.edges ?? [], portId as never, bridges as never, cls, opts as never);
+  const wires = wiresRO as WireSegment[];
+  const flags = flagsRO as FlagEntry[];
+  repairNets(annotated, wires, flags, cls);
 
   // ── Stage 9: emit + clean ─────────────────────────────────────────────────
-  let asc = emitAsc(annotated as never, wires as any, flags as any, directives);
+  let asc = emitAsc(annotated as never, wires as never, flags as never, directives);
   asc = mergeWires(asc);
   asc = detectJunctions(asc);
   return asc;

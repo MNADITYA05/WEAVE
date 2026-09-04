@@ -14,6 +14,8 @@ import { railLabel } from './classifier.js';
 interface RepairComp {
   readonly name: string;
   readonly nets: readonly string[];
+  readonly sym:  string;
+  readonly value: string;
   abs?: readonly Point[];
 }
 
@@ -42,7 +44,7 @@ export function repairNets(
       if (endpoints.has(pinKey)) return;
       if (wires.some(w => onSeg(px, py, w[0], w[1], w[2], w[3]))) return;
 
-      const label = t === 'gnd' ? '0' : railLabel(n, comps as any);
+      const label = t === 'gnd' ? '0' : railLabel(n, comps);
       const dirs: [number, number][] = [[0, 1], [0, -1], [1, 0], [-1, 0]];
       for (const [dx, dy] of dirs) {
         const ex = px + dx * 32, ey = py + dy * 32;

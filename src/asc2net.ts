@@ -8,6 +8,7 @@ import { rot, onSeg, ptKey } from './shared/geometry.js';
 import { UF } from './shared/union-find.js';
 import { SYMBOLS } from './tab1/symbols.js';
 import type { RotCode, Point } from './types.js';
+import { logger } from './logger.js';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -73,14 +74,28 @@ function reorderNets(
   symAttrSpiceOrder: string | null,
 ): string[] {
   let order: number[] | null = symDef?.ord ?? null;
-  if (symAttrSpiceOrder) order = symAttrSpiceOrder.trim().split(/\s+/).map(Number);
+  if (symAttrSpiceOrder) {
+    const parsed = symAttrSpiceOrder.trim().split(/\s+/).map(Number);
+    if (parsed.some(isNaN)) {
+      logger.warn(`asc2net: SpiceOrder "${symAttrSpiceOrder}" contains non-numeric tokens — ignoring`);
+    } else {
+      order = parsed;
+    }
+  }
   if (!order) return rawNets;
   const result = new Array<string>(rawNets.length);
   for (let i = 0; i < order.length && i < rawNets.length; i++) {
     const spicePos = order[i]! - 1;
     if (spicePos >= 0 && spicePos < rawNets.length) result[spicePos] = rawNets[i]!;
   }
-  for (let i = 0; i < result.length; i++) if (result[i] === undefined) result[i] = '0';
+  // Bug fix: unmapped slots get the raw net at that index rather than silently
+  // connecting to ground ('0'), which would produce an incorrect netlist.
+  for (let i = 0; i < result.length; i++) {
+    if (result[i] === undefined) {
+      logger.warn(`asc2net: pin slot ${i} unmapped by SpiceOrder — using raw net "${rawNets[i]}"`);
+      result[i] = rawNets[i] ?? '?';
+    }
+  }
   return result;
 }
 
