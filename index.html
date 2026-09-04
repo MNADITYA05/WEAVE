@@ -4,6 +4,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Weave — SPICE ↔ LTspice Schematic</title>
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="src/tab3/simulator.css">
 </head>
 <body>
 <header>
@@ -13,6 +14,7 @@
 <div class="tabs">
   <button class="tab active" id="tab1" onclick="switchTab(1)">Netlist &rarr; Schematic</button>
   <button class="tab"        id="tab2" onclick="switchTab(2)">Schematic &rarr; Netlist</button>
+  <button class="tab"        id="tab3" onclick="switchTab(3)">Simulator</button>
 </div>
 
 <!-- ===== TAB 1: Netlist → Schematic (original Weave) ===== -->
@@ -21,6 +23,7 @@
     <select id="ex"></select>
     <button id="go">Convert</button>
     <button id="dl">Download .asc</button>
+    <button id="validate">&#9679; Validate</button>
     <span id="status"></span>
     <span class="spacer"></span>
     <span id="info"></span>
@@ -40,6 +43,11 @@
 <!-- ===== TAB 2: Schematic → Netlist ===== -->
 <div class="tabpanel" id="panel2">
   <div id="sc-root" style="height:100%;display:flex;flex-direction:column"></div>
+</div>
+
+<!-- ===== TAB 3: Simulator ===== -->
+<div class="tabpanel" id="panel3">
+  <div id="sc3-root" style="height:100%;display:flex;flex-direction:column"></div>
 </div>
 
 <!-- Scripts: load order matters — ELK → data → src -->

@@ -18,6 +18,7 @@ import { symbolsReady, SYMBOLS }     from './tab1/symbols.js';
 
 // @ts-ignore — Tab 2 editor not yet migrated
 import { initEditor }   from './tab2/schematic-editor.js';
+import { initSimulator } from './tab3/simulator.js';
 import { logger }                            from './logger.js';
 import { ParseError, SymbolError, LayoutError, RoutingError, WeaveError } from './errors.js';
 
@@ -25,14 +26,17 @@ import { ParseError, SymbolError, LayoutError, RoutingError, WeaveError } from '
 declare const ELK: new () => unknown;
 
 const APP_VERSION = '5.0';
+const SIM_BACKEND: string = (import.meta as Record<string, unknown> & { env: Record<string, string> }).env?.VITE_SIM_BACKEND ?? 'http://localhost:8000';
 
 // ─── Tab switching ────────────────────────────────────────────────────────────
 
 function switchTab(n: number): void {
   (document.getElementById('panel1') as HTMLElement).classList.toggle('active', n === 1);
   (document.getElementById('panel2') as HTMLElement).classList.toggle('active', n === 2);
+  (document.getElementById('panel3') as HTMLElement).classList.toggle('active', n === 3);
   (document.getElementById('tab1')   as HTMLElement).classList.toggle('active', n === 1);
   (document.getElementById('tab2')   as HTMLElement).classList.toggle('active', n === 2);
+  (document.getElementById('tab3')   as HTMLElement).classList.toggle('active', n === 3);
 }
 
 // ─── Console logger ───────────────────────────────────────────────────────────
@@ -119,6 +123,31 @@ R3 inm out 1
 
 let lastAsc = '';
 
+
+async function validate(): Promise<void> {
+  const src = (document.getElementById('nl') as HTMLTextAreaElement).value.trim();
+  if (!src) { clog('Validate: netlist is empty', 'warn'); return; }
+  clog('Validating netlist…', 'dim');
+  try {
+    const resp = await fetch(SIM_BACKEND + '/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ netlist: src, sim_type: 'tran', params: {} }),
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json() as { ok: boolean; errors: string[] };
+    if (data.ok) {
+      clog('✓ Validation passed — no errors', 'ok');
+    } else {
+      clog('✗ Validation failed: ' + data.errors.length + ' issue(s)', 'err');
+      data.errors.forEach(e => clog('  ' + e, 'err'));
+    }
+  } catch (e) {
+    clog('Validate error: ' + (e instanceof Error ? e.message : String(e)), 'err');
+  }
+}
+
 async function run(): Promise<void> {
   const src    = (document.getElementById('nl')     as HTMLTextAreaElement).value.trim();
   const status = document.getElementById('status')  as HTMLElement;
@@ -203,6 +232,7 @@ function download(): void {
 
 window.addEventListener('DOMContentLoaded', () => {
   initEditor(document.getElementById('sc-root')!);
+  initSimulator(document.getElementById('sc3-root')!);
   (document.getElementById('ver') as HTMLElement).textContent = 'v' + APP_VERSION;
 
   // Show loading state until symbol table is ready
@@ -252,6 +282,7 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
   goBtn.onclick = () => void run();
+  (document.getElementById('validate') as HTMLButtonElement).onclick = () => void validate();
   dlBtn.onclick = download;
 
   let t1: ReturnType<typeof setTimeout>;
