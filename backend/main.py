@@ -90,13 +90,15 @@ def validate(req: SimRequest) -> ValidateResponse:
     import tempfile
     import os
     from pathlib import Path
-    from runner import NGSPICE_BIN, TIMEOUT_SEC
+    from runner import NGSPICE_BIN, TIMEOUT_SEC, _copy_spicelib
+    from netlist import _resolve_spicelib
 
     errors: list[str] = []
     with tempfile.TemporaryDirectory() as tmpdir:
+        _copy_spicelib(tmpdir)
         cir_path = os.path.join(tmpdir, "circuit.cir")
         # Minimal netlist — just check parse
-        Path(cir_path).write_text(req.netlist)
+        Path(cir_path).write_text(_resolve_spicelib(req.netlist))
         try:
             proc = subprocess.run(
                 [NGSPICE_BIN, "-b", cir_path],

@@ -22,8 +22,12 @@ COPY . .
 RUN npm run build
 
 # ── Runtime ─────────────────────────────────────────────────────────────────
-# Backend on :8000, frontend served statically by uvicorn via StaticFiles
 COPY backend/ ./backend/
+
+# ── Bundled SPICE model library ──────────────────────────────────────────────
+RUN mkdir -p /spicelib
+COPY backend/spicelib/ /spicelib/
+ENV NGSPICE_SPICELIB=/spicelib
 
 EXPOSE 8000
 

@@ -282,7 +282,6 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
   goBtn.onclick = () => void run();
-  (document.getElementById('validate') as HTMLButtonElement).onclick = () => void validate();
   dlBtn.onclick = download;
 
   let t1: ReturnType<typeof setTimeout>;

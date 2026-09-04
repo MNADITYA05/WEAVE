@@ -1,0 +1,52 @@
+* standard.lib - bundled common SPICE models
+
+**** DIODES ****
+.model 1N4148 D(Is=2.52n Rs=0.568 N=1.752 Cjo=4p M=0.4 tt=20n Bv=100 Ibv=0.1u)
+.model 1N4007 D(Is=76.9p Rs=0.042 N=1.45 Cjo=26.5p M=0.333 tt=4.32u Bv=1000 Ibv=5u)
+.model 1N5819 D(Is=1.04m Rs=0.14 N=1.07 Cjo=110p M=0.34 tt=1n Bv=40 Ibv=1m)
+.model LED D(Is=93.2p Rs=42m N=3.73 Cjo=2.97p M=0.333 Vj=0.75 tt=4.32u Bv=4 Ibv=10u)
+
+**** NPN BJTs ****
+.model 2N2222A NPN(Is=14.34f Xti=3 Eg=1.11 Vaf=74.3 Bf=255.9 Ne=1.307
++ Ise=14.34f Ikf=0.2847 Xtb=1.5 Br=6.092 Nc=2 Isc=0 Ikr=0 Rc=1
++ Cjc=7.306p Mjc=0.3416 Vjc=0.75 Fc=0.5 Cje=22.01p Mje=0.377 Vje=0.75
++ Tr=46.91n Tf=411.1p Itf=0.6 Vtf=1.7 Xtf=3 Rb=10)
+.model 2N3904 NPN(Is=6.734f Xti=3 Eg=1.11 Vaf=74.03 Bf=416.4 Ne=1.259
++ Ise=6.734f Ikf=66.78m Xtb=1.5 Br=0.7371 Nc=2 Isc=0 Ikr=0 Rc=1
++ Cjc=3.638p Mjc=0.3085 Vjc=0.75 Fc=0.5 Cje=4.493p Mje=0.2593 Vje=0.75
++ Tr=239.5n Tf=301.2p Itf=0.4 Vtf=10 Xtf=2 Rb=10)
+.model 2N3055 NPN(Is=1.81n Xti=3 Eg=1.11 Vaf=37.5 Bf=75.8 Br=1.01
++ Rb=0.25 Rc=0.1 Cjc=170p Cje=500p Tf=2n)
+
+**** PNP BJTs ****
+.model 2N3906 PNP(Is=1.41f Xti=3 Eg=1.11 Vaf=18.7 Bf=180.7 Ne=1.5
++ Ise=0 Ikf=80m Xtb=1.5 Br=4.977 Nc=2 Isc=0 Ikr=0 Rc=2.5
++ Cjc=9.728p Mjc=0.5776 Vjc=0.75 Fc=0.5 Cje=8.063p Mje=0.3677 Vje=0.75
++ Tr=33.42n Tf=179.3p Itf=0.4 Vtf=10 Xtf=2 Rb=10)
+.model 2N2907A PNP(Is=650f Xti=3 Eg=1.11 Vaf=115.7 Bf=231.7 Ne=1.829
++ Ise=54.81f Ikf=1.079 Xtb=1.5 Br=3.563 Nc=2 Isc=0 Ikr=0 Rc=0.715
++ Cjc=14.76p Mjc=0.5383 Vjc=0.75 Fc=0.5 Cje=19.82p Mje=0.3357 Vje=0.75
++ Tr=111.3n Tf=603.7p Itf=0.65 Vtf=5 Xtf=1.7 Rb=10)
+
+**** N-CHANNEL MOSFETs ****
+.model 2N7000 NMOS(Level=3 Vto=2.5 Kp=80m Rs=3 Rb=3 Rd=3 Cbd=35p Cbs=35p)
+.model IRF540 NMOS(Level=3 Vto=3.6 Kp=5.18 Rs=76m Rd=76m Rg=1 Cbd=940p Cbs=1.6n)
+
+**** OPAMP SUBCIRCUITS ****
+.subckt OPAMP_IDEAL inp inn vcc vee out
+Rin inp inn 1Meg
+Egain out 0 inp inn 100k
+Rout out 0 75
+.ends OPAMP_IDEAL
+
+.subckt LM741 INP INN VCC VEE OUT
+Rin INP INN 2Meg
+Gbw  OUT 0 INP INN 200k
+Rout OUT 0 75
+.ends LM741
+
+.subckt LM358 INP INN VCC GND OUT
+Rin INP INN 1Meg
+Gbw  OUT GND INP GND 100k
+Rout OUT GND 100
+.ends LM358

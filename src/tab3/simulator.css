@@ -88,3 +88,29 @@
   color: #444; font-size: 14px; pointer-events: none; text-align: center;
   white-space: pre-wrap; max-width: 320px;
 }
+/* ── op / tf result table ─────────────────────────────────────────────── */
+.sc3-table-wrap {
+  flex: 1; overflow-y: auto; padding: 16px;
+}
+.sc3-table-title {
+  font-size: 12px; font-weight: 600; color: #aaa; margin-bottom: 8px;
+  text-transform: uppercase; letter-spacing: .06em;
+}
+.sc3-table {
+  width: 100%; border-collapse: collapse; font-size: 12px;
+}
+.sc3-table thead th {
+  text-align: left; padding: 4px 10px;
+  color: #888; font-weight: 500;
+  border-bottom: 1px solid #333;
+}
+.sc3-table tbody tr:nth-child(even) { background: #1e1e1e; }
+.sc3-table tbody tr:hover { background: #263238; }
+.sc3-td-name { padding: 5px 10px; color: #e0e0e0; font-family: monospace; }
+.sc3-td-val  { padding: 5px 10px; color: #80cbc4; font-family: monospace; text-align: right; }
+.sc3-td-unit { padding: 5px 10px; color: #666; }
+/* empty state */
+.sc3-empty {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  color: #555; font-size: 13px;
+}
