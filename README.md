@@ -3,10 +3,11 @@
 ![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)
 ![Status](https://img.shields.io/badge/status-active-brightgreen?style=flat-square)
 ![Client-Side](https://img.shields.io/badge/fully-client--side-orange?style=flat-square)
-![No Build](https://img.shields.io/badge/build%20step-none-lightgrey?style=flat-square)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat-square)
+![Vite](https://img.shields.io/badge/Vite-5-purple?style=flat-square)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)
 
-> **One-liner:** A fully client-side, zero-dependency browser tool that converts SPICE netlists to interactive LTspice schematics — and draws schematics that generate netlists back.
+> **One-liner:** A fully client-side browser tool that converts SPICE netlists to interactive LTspice schematics — and draws schematics that generate netlists back.
 
 ---
 
@@ -43,11 +44,11 @@ SPICE netlists are text — powerful, but completely opaque to anyone who isn't 
 
 ## 🎯 Our Solution & Purpose
 
-**Weave** is a browser-based EDA utility that provides a complete, bidirectional SPICE ↔ LTspice schematic workflow — with zero installation, zero server calls, and zero build step.
+**Weave** is a browser-based EDA utility that provides a complete, bidirectional SPICE ↔ LTspice schematic workflow — with zero installation, zero server calls, and no data leaving your machine.
 
 It solves the above by:
-1. **Netlist → Schematic (Tab 1)** — Paste any SPICE netlist; Weave parses it, classifies topology, runs an elkjs auto-layout, and renders a downloadable LTspice `.asc` schematic.
-2. **Schematic → Netlist (Tab 2)** — Use the interactive SVG canvas to place components, draw wires, and click Convert to get a simulation-ready SPICE netlist instantly.
+1. **Netlist → Schematic (Tab 1)** — Paste any SPICE netlist; Weave parses it, classifies topology, runs an ELK.js auto-layout, and renders a downloadable LTspice `.asc` schematic.
+2. **Schematic → Netlist (Tab 2)** — Use the interactive SVG canvas to place components, draw wires, rotate and mirror symbols, and click Convert to get a simulation-ready SPICE netlist instantly.
 3. **Fully client-side** — Everything runs in the browser. No backend, no accounts, no data leaves your machine.
 
 ---
@@ -61,7 +62,7 @@ It solves the above by:
 | SPICE netlist → schematic | ✅ | ❌ | ❌ | ❌ |
 | Schematic → SPICE netlist | ✅ | ✅ | ✅ | ✅ |
 | LTspice `.asc` export | ✅ | ❌ | ✅ | ❌ |
-| No build step required | ✅ | ❌ | ❌ | ❌ |
+| Full 8-code rotation (R0–MR270) | ✅ | ✅ | ✅ | ❌ |
 | Open source | ✅ | ✅ | ❌ | ❌ |
 | Offline capable | ✅ | ✅ | ✅ | ❌ |
 
@@ -74,9 +75,15 @@ It solves the above by:
 ### Frontend
 | Technology | Version | Purpose |
 |---|---|---|
-| Vanilla JavaScript (ES Modules) | ES2022 | All application logic — zero framework overhead |
-| SVG | — | Interactive schematic canvas with pan, zoom, and grid |
+| TypeScript | 5 | All application logic — full static typing across Tab 1 and Tab 2 |
+| SVG | — | Interactive schematic canvas with pan, zoom, grid snap, and ghost rendering |
 | HTML5 / CSS3 | — | UI layout, tabs, dark theme |
+
+### Build & Dev
+| Technology | Version | Purpose |
+|---|---|---|
+| [Vite](https://vitejs.dev/) | 5 | Dev server with HMR + production bundler |
+| TypeScript compiler | 5 | Type checking and transpilation |
 
 ### Layout Engine
 | Technology | Version | Purpose |
@@ -86,14 +93,11 @@ It solves the above by:
 ### Parsing & Netlist Generation
 | Technology | Version | Purpose |
 |---|---|---|
-| Custom SPICE parser (`netlist-parser.js`) | — | Tokenises and models SPICE netlist elements |
+| Custom SPICE parser (`netlist-parser.ts`) | — | Tokenises and models SPICE netlist elements; warns on MOSFET bulk-node collapse |
 | Union-Find (DSU) | — | Wire connectivity → net name assignment in Tab 2 |
-| Custom `.asc` emitter (`flag-emit.js`, `renderer.js`) | — | Produces valid LTspice schematic files |
-
-### Dev Server
-| Technology | Version | Purpose |
-|---|---|---|
-| Any static HTTP server | — | Serve `index.html` locally (e.g. `python3 -m http.server 8080`) |
+| Custom `.asc` emitter (`flag-emit.ts`, `renderer.ts`) | — | Produces valid LTspice schematic files |
+| Typed error hierarchy | — | `WeaveError` → `ParseError \| SymbolError \| LayoutError \| RoutingError` |
+| Configurable logger | — | Single `logger` object with `level` + `onEmit` hook wired to the UI console pane |
 
 ---
 
@@ -103,11 +107,11 @@ It solves the above by:
 
 ```mermaid
 flowchart TD
-    A([User pastes SPICE netlist]) --> B[netlist-parser.js\nTokenise & build component graph]
-    B --> C[classifier.js\nDetect topology & component roles]
-    C --> D[router.js + layout.js\nRun elkjs auto-layout]
-    D --> E[renderer.js\nEmit LTspice .asc symbol blocks]
-    E --> F[flag-emit.js\nAdd net labels & GND flags]
+    A([User pastes SPICE netlist]) --> B[netlist-parser.ts\nTokenise & build component graph]
+    B --> C[classifier.ts\nDetect topology & component roles]
+    C --> D[router.ts + layout.ts\nRun ELK.js auto-layout]
+    D --> E[renderer.ts\nEmit LTspice .asc symbol blocks]
+    E --> F[flag-emit.ts\nAdd net labels & GND flags]
     F --> G([.asc file ready for download\nor SVG preview in browser])
 
     style A fill:#4F46E5,color:#fff,stroke:none
@@ -118,7 +122,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A([User places components\non SVG canvas]) --> B[schematic-editor.js\nTrack S.comps + S.wires state]
+    A([User places components\non SVG canvas]) --> B[schematic-editor.ts\nTrack S.comps + S.wires state]
     B --> C[User clicks Convert]
     C --> D[generateNetlist\nCollect all pin world-coords]
     D --> E[Union-Find over wire segments\nMerge connected pins into nets]
@@ -135,7 +139,7 @@ flowchart TD
 |---|---|
 | **Parse** | Raw SPICE text → structured component objects with node connections |
 | **Classify** | Identify subcircuits, power rails, ground flags, and topology hints |
-| **Layout** | elkjs assigns x/y positions and routing for each component |
+| **Layout** | ELK.js assigns x/y positions and routing for each component |
 | **Render** | Positions → LTspice `.asc` coordinate space with symbol references |
 | **Canvas** | User clicks palette buttons, places components at snapped grid positions (16 px) |
 | **Union-Find** | Each wire segment is scanned; all pin world-coordinates it passes through are unioned into a single net |
@@ -150,6 +154,9 @@ weave/
 │
 ├── index.html                  # Single-page app shell; two-tab layout
 ├── landing.html                # Marketing landing page
+├── vite.config.ts              # Vite build and dev server configuration
+├── tsconfig.json               # TypeScript compiler options
+├── package.json                # npm scripts and dependency manifest
 │
 ├── css/
 │   └── style.css               # Global dark-theme styles
@@ -158,35 +165,38 @@ weave/
 │
 ├── data/                       # Static reference data (symbol definitions, etc.)
 │
-├── src/                        # All application source — plain ES modules
-│   ├── app.js                  # Entry point; mounts Tab 1 and Tab 2 (imports from tab1/ & tab2/)
-│   ├── asc2net.js              # .asc → netlist converter — bidirectional utility (kept at root)
+├── src/                        # All application source — TypeScript ES modules
+│   ├── app.ts                  # Entry point; mounts Tab 1 and Tab 2; wires logger.onEmit to UI console
+│   ├── logger.ts               # Configurable logger (level + onEmit hook)
+│   ├── errors.ts               # Typed error hierarchy: WeaveError → ParseError | SymbolError | LayoutError | RoutingError
+│   ├── asc2net.ts              # .asc → netlist converter — bidirectional utility
 │   │
 │   ├── tab1/                   # Netlist → Schematic pipeline (Tab 1)
-│   │   ├── convert.js          # Top-level Tab 1 orchestrator
-│   │   ├── netlist-parser.js   # SPICE netlist tokeniser and AST builder
-│   │   ├── classifier.js       # Topology classification (series/parallel/bridge etc.)
-│   │   ├── layout.js           # elkjs layout wrapper
-│   │   ├── router.js           # Wire routing logic
-│   │   ├── route-helpers.js    # Geometry helpers for routing
-│   │   ├── renderer.js         # LTspice .asc symbol emitter
-│   │   ├── flag-emit.js        # Net flag and GND symbol emitter
-│   │   ├── symbols.js          # LTspice symbol name mapping
-│   │   ├── orientation.js      # Component rotation and depth logic (uses symbols + classifier)
-│   │   ├── net-repair.js       # Net connectivity repair passes
-│   │   ├── place-isolated.js   # Layout for isolated (unconnected) components
-│   │   ├── place-repair.js     # Post-layout position repair
-│   │   ├── safe-modes.js       # Fallback rendering strategies
-│   │   ├── verifier.js         # Output netlist sanity checks
-│   │   └── wire-merge.js       # Wire segment simplification
+│   │   ├── convert.ts          # Top-level Tab 1 orchestrator
+│   │   ├── netlist-parser.ts   # SPICE netlist tokeniser and AST builder
+│   │   ├── classifier.ts       # Topology classification (series/parallel/bridge etc.)
+│   │   ├── layout.ts           # ELK.js layout wrapper
+│   │   ├── router.ts           # Wire routing logic
+│   │   ├── route-helpers.ts    # Geometry helpers for routing
+│   │   ├── renderer.ts         # LTspice .asc symbol emitter
+│   │   ├── flag-emit.ts        # Net flag and GND symbol emitter
+│   │   ├── symbols.ts          # LTspice symbol name mapping
+│   │   ├── orientation.ts      # Component rotation and depth logic
+│   │   ├── net-repair.ts       # Net connectivity repair passes
+│   │   ├── place-isolated.ts   # Layout for isolated (unconnected) components
+│   │   ├── place-repair.ts     # Post-layout position repair
+│   │   ├── safe-modes.ts       # Fallback rendering strategies
+│   │   ├── verifier.ts         # Output netlist sanity checks
+│   │   └── wire-merge.ts       # Wire segment simplification + junction detection
 │   │
 │   ├── tab2/                   # Schematic → Netlist pipeline (Tab 2)
-│   │   ├── schematic-editor.js # Full interactive SVG canvas editor + netlist generation
-│   │   └── schematic-symbols.js# Component SVG shapes + pin coordinate definitions
+│   │   ├── schematic-editor.ts # Full interactive SVG canvas editor + netlist generation
+│   │   │                       # Supports all 8 LTspice rotation codes (R0/R90/R180/R270/MR0/MR90/MR180/MR270)
+│   │   └── schematic-symbols.ts# Component SVG shapes + pin coordinate definitions
 │   │
 │   └── shared/                 # Pure geometry utilities — no tab1/tab2 dependencies
-│       ├── geometry.js         # 2D geometry primitives (GRID, snap, rot, rotBBox)
-│       └── topology.js         # Graph connectivity analysis (topology hints)
+│       ├── geometry.ts         # 2D geometry primitives (GRID, snap, rot, rotBBox)
+│       └── topology.ts         # Graph connectivity analysis (topology hints)
 │
 └── tests/                      # Test fixtures and scripts
 ```
@@ -195,15 +205,14 @@ weave/
 
 ## 🧰 Prerequisites
 
-No build tools, no package manager, no runtime dependencies to install.
-
 | Requirement | Minimum Version | Check Command | Notes |
 |---|---|---|---|
+| Node.js | 18+ | `node --version` | Required for Vite dev server and build |
+| npm | 9+ | `npm --version` | Bundled with Node.js |
 | Any modern browser | Chrome 90+ / Firefox 90+ / Safari 15+ | — | ES Modules + SVG required |
-| Any static HTTP server | — | — | Needed to serve ES modules (can't use `file://`) |
 | Git | v2.x | `git --version` | For cloning only |
 
-> ⚠️ **`file://` won't work** — browsers block ES module imports from `file://` origins. Use any local HTTP server (examples below).
+> ⚠️ **`file://` won't work** — browsers block ES module imports from `file://` origins. Always use the Vite dev server (`npm run dev`).
 
 ---
 
@@ -216,28 +225,31 @@ git clone https://github.com/your-username/weave.git
 cd weave
 ```
 
-### 2. Start a Local Server
-
-Pick whichever is already on your machine:
+### 2. Install Dependencies
 
 ```bash
-# Python (built into macOS/Linux)
-python3 -m http.server 8080
-
-# Node.js (npx, no install needed)
-npx serve .
-
-# PHP
-php -S localhost:8080
+npm install
 ```
 
-### 3. Open in Browser
+### 3. Start the Dev Server
+
+```bash
+npm run dev
+```
+
+### 4. Open in Browser
 
 ```
-http://localhost:8080
+http://localhost:5173
 ```
 
-That's it. No `npm install`, no build step, no environment variables.
+### Production Build (optional)
+
+```bash
+npm run build
+```
+
+Output goes to `dist/` — serve with any static file host.
 
 ---
 
@@ -265,7 +277,7 @@ C1 out 0 1n
 ### Tab 2 — Schematic → Netlist
 
 1. Click a component in the **left palette** (Resistor, Capacitor, NPN BJT, etc.).
-2. Click on the canvas to place it. Press **R** to rotate before placing.
+2. Click on the canvas to place it. Press **R** to rotate or **M** to mirror before placing.
 3. Click **Wire** then click two points to draw a wire segment.
 4. Click **Convert** to generate the SPICE netlist.
 5. Click **.net** to download it.
@@ -274,9 +286,26 @@ C1 out 0 1n
 
 | Key | Action |
 |---|---|
-| `R` | Rotate component while placing |
-| `Escape` | Cancel current action / return to Select mode |
+| `R` | Rotate component 90° (works in place mode and select mode) |
+| `M` | Mirror component horizontally (works in place mode and select mode) |
+| `Escape` | Cancel current action / deselect / return to Select mode |
 | `Delete` | Delete selected component |
+| `W` | Enter wire-drawing mode |
+
+### LTspice Rotation Codes
+
+Weave fully supports all 8 LTspice rotation codes used in `.asc` files:
+
+| Code | Meaning |
+|---|---|
+| `R0` | No rotation (default upright) |
+| `R90` | Rotated 90° counter-clockwise |
+| `R180` | Rotated 180° |
+| `R270` | Rotated 270° counter-clockwise |
+| `MR0` | Mirrored horizontally, no rotation |
+| `MR90` | Mirrored, then rotated 90° |
+| `MR180` | Mirrored, then rotated 180° |
+| `MR270` | Mirrored, then rotated 270° |
 
 ### Common Workflows
 
@@ -290,13 +319,14 @@ C1 out 0 1n
 
 ## ⚙️ Configuration
 
-Weave is fully static — there are no environment variables or server configuration. The only tunables are inside the source files:
+Weave is fully static after the build step — no environment variables or server configuration. The only tunables are inside the source files:
 
 | Constant | File | Default | Description |
 |---|---|---|---|
-| `GRID` | `tab2/schematic-editor.js` | `16` | Canvas grid snap size in pixels |
-| `?v=N` query strings | `src/app.js`, `index.html` | incremented manually | Cache-busting version for ES module imports |
-| `elkjs` layout options | `tab1/layout.js` | see file | elk algorithm and spacing parameters |
+| `GRID` | `tab2/schematic-editor.ts` | `16` | Canvas grid snap size in pixels |
+| `logger.level` | `src/logger.ts` | `'info'` | Logging verbosity: `'debug' \| 'info' \| 'warn' \| 'error'` |
+| `logger.onEmit` | `src/app.ts` | UI console hook | Override to redirect log output |
+| ELK.js layout options | `tab1/layout.ts` | see file | ELK algorithm and spacing parameters |
 
 ---
 
@@ -337,8 +367,12 @@ We welcome contributions of all kinds — bug fixes, new component symbols, layo
    # or
    git checkout -b fix/your-bug-description
    ```
-3. **Make** your changes — no build step required, just edit and refresh
-4. **Push** to your fork and open a Pull Request
+3. **Install dependencies** and start the dev server:
+   ```bash
+   npm install && npm run dev
+   ```
+4. **Make** your changes — Vite HMR reloads the browser automatically
+5. **Push** to your fork and open a Pull Request
 
 ### Branch Naming Convention
 
@@ -369,9 +403,9 @@ symbol(opamp): add VCVS-based op-amp symbol
 ### Pull Request Checklist
 
 - [ ] No breaking changes to existing netlists
-- [ ] New symbols include correct pin coordinate definitions in `tab2/schematic-symbols.js`
+- [ ] New symbols include correct pin coordinate definitions in `tab2/schematic-symbols.ts`
 - [ ] Wire connectivity verified (place + draw wire + Convert and check net names)
-- [ ] No external dependencies added (keep it zero-dep)
+- [ ] TypeScript compiles without errors (`npm run build`)
 - [ ] PR description explains *what* changed and *why*
 
 > 💬 For major changes (new layout engine, new parser), open an issue first to discuss before investing time.
@@ -382,7 +416,6 @@ symbol(opamp): add VCVS-based op-amp symbol
 
 ### Current Limitations
 
-- ⚠️ **Component rotation in Tab 2** — R0/R90 supported; R180/R270 render correctly but pin coords use consistent offsets regardless
 - ⚠️ **No diagonal wires** — Only axis-aligned (horizontal/vertical) wire segments are supported; `ptOnSeg` enforces this
 - ⚠️ **No undo/redo** — Component placement and wire drawing cannot be undone; use Clear to restart
 - ⚠️ **Single schematic sheet** — No hierarchical or multi-page schematics
@@ -392,13 +425,17 @@ symbol(opamp): add VCVS-based op-amp symbol
 
 | Status | Milestone | Target |
 |:---:|---|---|
-| ✅ Done | SPICE netlist → LTspice `.asc` via elkjs layout | v1.0 |
+| ✅ Done | SPICE netlist → LTspice `.asc` via ELK.js layout | v1.0 |
 | ✅ Done | Interactive SVG canvas with component placement and wire drawing | v1.0 |
 | ✅ Done | SPICE netlist generation from canvas (Union-Find connectivity) | v1.0 |
 | ✅ Done | 10+ component types: R, C, L, V, I, D, Q, M, J, B, E, G, F, H, GND, VDD | v1.0 |
-| 🔄 In Progress | R180/R270 pin coordinate correctness | v1.1 |
-| 🔄 In Progress | Undo / redo stack | v1.1 |
-| 📋 Planned | Op-amp symbol (VCVS-based) | v1.1 |
+| ✅ Done | Full TypeScript migration (TypeScript 5 + Vite 5) | v1.1 |
+| ✅ Done | All 8 LTspice rotation codes (R0/R90/R180/R270/MR0/MR90/MR180/MR270) | v1.1 |
+| ✅ Done | Mirror toggle (M key + Mirror button in properties panel) | v1.1 |
+| ✅ Done | Typed error hierarchy (WeaveError → ParseError / SymbolError / LayoutError / RoutingError) | v1.1 |
+| ✅ Done | Configurable logger wired to UI console pane | v1.1 |
+| 🔄 In Progress | Undo / redo stack | v1.2 |
+| 📋 Planned | Op-amp symbol (VCVS-based) | v1.2 |
 | 📋 Planned | Wire labels and named nets | v1.2 |
 | 📋 Planned | Export schematic as PNG/SVG image | v1.2 |
 | 📋 Planned | Import `.asc` file back into Tab 2 canvas | v2.0 |
