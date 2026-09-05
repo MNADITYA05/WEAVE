@@ -1,0 +1,5023 @@
+{
+  "res": {
+    "file": "res.asy",
+    "prefix": "R",
+    "bbox": {
+      "minX": 0,
+      "minY": 16,
+      "maxX": 32,
+      "maxY": 96,
+      "w": 32,
+      "h": 80
+    },
+    "lines": [
+      {
+        "x1": 16,
+        "y1": 88,
+        "x2": 16,
+        "y2": 96,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 80,
+        "x2": 16,
+        "y2": 88,
+        "style": "Normal"
+      },
+      {
+        "x1": 32,
+        "y1": 64,
+        "x2": 0,
+        "y2": 80,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 48,
+        "x2": 32,
+        "y2": 64,
+        "style": "Normal"
+      },
+      {
+        "x1": 32,
+        "y1": 32,
+        "x2": 0,
+        "y2": 48,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 16,
+        "x2": 16,
+        "y2": 24,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 24,
+        "x2": 32,
+        "y2": 32,
+        "style": "Normal"
+      }
+    ],
+    "circles": [],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 16,
+        "y": 16,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "A",
+        "spiceOrder": 1
+      },
+      {
+        "x": 16,
+        "y": 96,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "B",
+        "spiceOrder": 2
+      }
+    ],
+    "attrs": {
+      "Value": "R",
+      "Prefix": "R",
+      "Description": "A resistor"
+    }
+  },
+  "res2": {
+    "file": "res2.asy",
+    "prefix": "R",
+    "bbox": {
+      "minX": 0,
+      "minY": 0,
+      "maxX": 32,
+      "maxY": 64,
+      "w": 32,
+      "h": 64
+    },
+    "lines": [
+      {
+        "x1": 16,
+        "y1": 0,
+        "x2": 32,
+        "y2": 4,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 12,
+        "x2": 32,
+        "y2": 4,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 12,
+        "x2": 32,
+        "y2": 20,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 28,
+        "x2": 32,
+        "y2": 20,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 28,
+        "x2": 32,
+        "y2": 36,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 44,
+        "x2": 32,
+        "y2": 36,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 44,
+        "x2": 32,
+        "y2": 52,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 60,
+        "x2": 32,
+        "y2": 52,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 60,
+        "x2": 16,
+        "y2": 64,
+        "style": "Normal"
+      }
+    ],
+    "circles": [],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 16,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "A",
+        "spiceOrder": 1
+      },
+      {
+        "x": 16,
+        "y": 64,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "B",
+        "spiceOrder": 2
+      }
+    ],
+    "attrs": {
+      "Value": "R",
+      "Prefix": "R",
+      "Description": "A resistor"
+    }
+  },
+  "cap": {
+    "file": "cap.asy",
+    "prefix": "C",
+    "bbox": {
+      "minX": 0,
+      "minY": 0,
+      "maxX": 32,
+      "maxY": 64,
+      "w": 32,
+      "h": 64
+    },
+    "lines": [
+      {
+        "x1": 16,
+        "y1": 36,
+        "x2": 16,
+        "y2": 64,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 28,
+        "x2": 16,
+        "y2": 0,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 28,
+        "x2": 32,
+        "y2": 28,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 36,
+        "x2": 32,
+        "y2": 36,
+        "style": "Normal"
+      }
+    ],
+    "circles": [],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 16,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "A",
+        "spiceOrder": 1
+      },
+      {
+        "x": 16,
+        "y": 64,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "B",
+        "spiceOrder": 2
+      }
+    ],
+    "attrs": {
+      "Value": "C",
+      "Prefix": "C",
+      "Description": "Capacitor"
+    }
+  },
+  "polcap": {
+    "file": "polcap.asy",
+    "prefix": "C",
+    "bbox": {
+      "minX": -16,
+      "minY": 0,
+      "maxX": 48,
+      "maxY": 100,
+      "w": 64,
+      "h": 100
+    },
+    "lines": [
+      {
+        "x1": 16,
+        "y1": 36,
+        "x2": 16,
+        "y2": 64,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 0,
+        "x2": 16,
+        "y2": 28,
+        "style": "Normal"
+      },
+      {
+        "x1": 8,
+        "y1": 12,
+        "x2": 8,
+        "y2": 20,
+        "style": "Normal"
+      },
+      {
+        "x1": 4,
+        "y1": 16,
+        "x2": 12,
+        "y2": 16,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 28,
+        "x2": 32,
+        "y2": 28,
+        "style": "Normal"
+      }
+    ],
+    "circles": [],
+    "arcs": [
+      {
+        "x1": -16,
+        "y1": 36,
+        "x2": 48,
+        "y2": 100,
+        "x3": 32,
+        "y3": 40,
+        "x4": 0,
+        "y4": 40,
+        "style": "Normal"
+      }
+    ],
+    "rects": [],
+    "pins": [
+      {
+        "x": 16,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "A",
+        "spiceOrder": 1
+      },
+      {
+        "x": 16,
+        "y": 64,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "B",
+        "spiceOrder": 2
+      }
+    ],
+    "attrs": {
+      "Value": "C",
+      "Prefix": "C",
+      "Description": "Polarized Capacitor"
+    }
+  },
+  "ind": {
+    "file": "ind.asy",
+    "prefix": "L",
+    "bbox": {
+      "minX": 0,
+      "minY": 16,
+      "maxX": 32,
+      "maxY": 96,
+      "w": 32,
+      "h": 80
+    },
+    "lines": [],
+    "circles": [],
+    "arcs": [
+      {
+        "x1": 0,
+        "y1": 40,
+        "x2": 32,
+        "y2": 72,
+        "x3": 4,
+        "y3": 68,
+        "x4": 4,
+        "y4": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 64,
+        "x2": 32,
+        "y2": 96,
+        "x3": 16,
+        "y3": 96,
+        "x4": 4,
+        "y4": 68,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 16,
+        "x2": 32,
+        "y2": 48,
+        "x3": 4,
+        "y3": 44,
+        "x4": 16,
+        "y4": 16,
+        "style": "Normal"
+      }
+    ],
+    "rects": [],
+    "pins": [
+      {
+        "x": 16,
+        "y": 16,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "A",
+        "spiceOrder": 1
+      },
+      {
+        "x": 16,
+        "y": 96,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "B",
+        "spiceOrder": 2
+      }
+    ],
+    "attrs": {
+      "Value": "L",
+      "Prefix": "L",
+      "Description": "Inductor"
+    }
+  },
+  "ind2": {
+    "file": "ind2.asy",
+    "prefix": "L",
+    "bbox": {
+      "minX": 0,
+      "minY": 16,
+      "maxX": 32,
+      "maxY": 96,
+      "w": 32,
+      "h": 80
+    },
+    "lines": [],
+    "circles": [
+      {
+        "cx": 8,
+        "cy": 84,
+        "r": 4,
+        "style": "Normal"
+      }
+    ],
+    "arcs": [
+      {
+        "x1": 0,
+        "y1": 40,
+        "x2": 32,
+        "y2": 72,
+        "x3": 4,
+        "y3": 68,
+        "x4": 4,
+        "y4": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 64,
+        "x2": 32,
+        "y2": 96,
+        "x3": 16,
+        "y3": 96,
+        "x4": 4,
+        "y4": 68,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 16,
+        "x2": 32,
+        "y2": 48,
+        "x3": 4,
+        "y3": 44,
+        "x4": 16,
+        "y4": 16,
+        "style": "Normal"
+      }
+    ],
+    "rects": [],
+    "pins": [
+      {
+        "x": 16,
+        "y": 16,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "A",
+        "spiceOrder": 1
+      },
+      {
+        "x": 16,
+        "y": 96,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "B",
+        "spiceOrder": 2
+      }
+    ],
+    "attrs": {
+      "Value": "L",
+      "Prefix": "L",
+      "Description": "Inductor"
+    }
+  },
+  "voltage": {
+    "file": "voltage.asy",
+    "prefix": "V",
+    "bbox": {
+      "minX": -32,
+      "minY": 16,
+      "maxX": 32,
+      "maxY": 96,
+      "w": 64,
+      "h": 80
+    },
+    "lines": [
+      {
+        "x1": -8,
+        "y1": 36,
+        "x2": 8,
+        "y2": 36,
+        "style": "Normal"
+      },
+      {
+        "x1": -8,
+        "y1": 76,
+        "x2": 8,
+        "y2": 76,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 28,
+        "x2": 0,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 96,
+        "x2": 0,
+        "y2": 88,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 16,
+        "x2": 0,
+        "y2": 24,
+        "style": "Normal"
+      }
+    ],
+    "circles": [
+      {
+        "cx": 0,
+        "cy": 56,
+        "r": 32,
+        "style": "Normal"
+      }
+    ],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 0,
+        "y": 16,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "+",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 96,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "-",
+        "spiceOrder": 2
+      }
+    ],
+    "attrs": {
+      "Value": "V",
+      "Prefix": "V",
+      "Description": "Voltage Source, either DC, AC, PULSE, SINE, PWL, EXP, or SFFM"
+    }
+  },
+  "current": {
+    "file": "current.asy",
+    "prefix": "I",
+    "bbox": {
+      "minX": -32,
+      "minY": 0,
+      "maxX": 32,
+      "maxY": 80,
+      "w": 64,
+      "h": 80
+    },
+    "lines": [
+      {
+        "x1": 0,
+        "y1": 56,
+        "x2": 4,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 56,
+        "x2": -4,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": -4,
+        "y1": 44,
+        "x2": 4,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 24,
+        "x2": 0,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 80,
+        "x2": 0,
+        "y2": 72,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 0,
+        "x2": 0,
+        "y2": 8,
+        "style": "Normal"
+      }
+    ],
+    "circles": [
+      {
+        "cx": 0,
+        "cy": 40,
+        "r": 32,
+        "style": "Normal"
+      }
+    ],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 0,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "+",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 80,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "-",
+        "spiceOrder": 2
+      }
+    ],
+    "attrs": {
+      "Value": "I",
+      "Prefix": "I",
+      "Description": "Current source, either DC, AC, PULSE, SINE, PWL, EXP, or SFFM"
+    }
+  },
+  "diode": {
+    "file": "diode.asy",
+    "prefix": "D",
+    "bbox": {
+      "minX": 0,
+      "minY": 0,
+      "maxX": 32,
+      "maxY": 64,
+      "w": 32,
+      "h": 64
+    },
+    "lines": [
+      {
+        "x1": 0,
+        "y1": 44,
+        "x2": 32,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 20,
+        "x2": 32,
+        "y2": 20,
+        "style": "Normal"
+      },
+      {
+        "x1": 32,
+        "y1": 20,
+        "x2": 16,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 20,
+        "x2": 16,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 0,
+        "x2": 16,
+        "y2": 20,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 44,
+        "x2": 16,
+        "y2": 64,
+        "style": "Normal"
+      }
+    ],
+    "circles": [],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 16,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "+",
+        "spiceOrder": 1
+      },
+      {
+        "x": 16,
+        "y": 64,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "-",
+        "spiceOrder": 2
+      }
+    ],
+    "attrs": {
+      "Value": "D",
+      "Prefix": "D",
+      "Description": "Diode"
+    }
+  },
+  "zener": {
+    "file": "zener.asy",
+    "prefix": "D",
+    "bbox": {
+      "minX": -4,
+      "minY": 0,
+      "maxX": 36,
+      "maxY": 64,
+      "w": 40,
+      "h": 64
+    },
+    "lines": [
+      {
+        "x1": 0,
+        "y1": 44,
+        "x2": -4,
+        "y2": 48,
+        "style": "Normal"
+      },
+      {
+        "x1": 32,
+        "y1": 44,
+        "x2": 36,
+        "y2": 40,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 44,
+        "x2": 32,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 20,
+        "x2": 32,
+        "y2": 20,
+        "style": "Normal"
+      },
+      {
+        "x1": 32,
+        "y1": 20,
+        "x2": 16,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 20,
+        "x2": 16,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 0,
+        "x2": 16,
+        "y2": 20,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 44,
+        "x2": 16,
+        "y2": 64,
+        "style": "Normal"
+      }
+    ],
+    "circles": [],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 16,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "+",
+        "spiceOrder": 1
+      },
+      {
+        "x": 16,
+        "y": 64,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "-",
+        "spiceOrder": 2
+      }
+    ],
+    "attrs": {
+      "Value": "D",
+      "Prefix": "D",
+      "Description": "Zener Diode"
+    }
+  },
+  "schottky": {
+    "file": "schottky.asy",
+    "prefix": "D",
+    "bbox": {
+      "minX": 0,
+      "minY": 0,
+      "maxX": 32,
+      "maxY": 64,
+      "w": 32,
+      "h": 64
+    },
+    "lines": [
+      {
+        "x1": 0,
+        "y1": 36,
+        "x2": 4,
+        "y2": 36,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 44,
+        "x2": 0,
+        "y2": 36,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 44,
+        "x2": 32,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 32,
+        "y1": 44,
+        "x2": 32,
+        "y2": 52,
+        "style": "Normal"
+      },
+      {
+        "x1": 32,
+        "y1": 52,
+        "x2": 28,
+        "y2": 52,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 20,
+        "x2": 32,
+        "y2": 20,
+        "style": "Normal"
+      },
+      {
+        "x1": 32,
+        "y1": 20,
+        "x2": 16,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 20,
+        "x2": 16,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 0,
+        "x2": 16,
+        "y2": 20,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 44,
+        "x2": 16,
+        "y2": 64,
+        "style": "Normal"
+      }
+    ],
+    "circles": [],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 16,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "+",
+        "spiceOrder": 1
+      },
+      {
+        "x": 16,
+        "y": 64,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "-",
+        "spiceOrder": 2
+      }
+    ],
+    "attrs": {
+      "Value": "D",
+      "Prefix": "D",
+      "Description": "Schottky diode"
+    }
+  },
+  "led": {
+    "file": "LED.asy",
+    "prefix": "D",
+    "bbox": {
+      "minX": 0,
+      "minY": 0,
+      "maxX": 72,
+      "maxY": 64,
+      "w": 72,
+      "h": 64
+    },
+    "lines": [
+      {
+        "x1": 0,
+        "y1": 44,
+        "x2": 32,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 20,
+        "x2": 32,
+        "y2": 20,
+        "style": "Normal"
+      },
+      {
+        "x1": 32,
+        "y1": 20,
+        "x2": 16,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 20,
+        "x2": 16,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 0,
+        "x2": 16,
+        "y2": 20,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 44,
+        "x2": 16,
+        "y2": 64,
+        "style": "Normal"
+      },
+      {
+        "x1": 72,
+        "y1": 32,
+        "x2": 68,
+        "y2": 40,
+        "style": "Normal"
+      },
+      {
+        "x1": 72,
+        "y1": 32,
+        "x2": 64,
+        "y2": 32,
+        "style": "Normal"
+      },
+      {
+        "x1": 72,
+        "y1": 48,
+        "x2": 68,
+        "y2": 56,
+        "style": "Normal"
+      },
+      {
+        "x1": 72,
+        "y1": 48,
+        "x2": 64,
+        "y2": 48,
+        "style": "Normal"
+      }
+    ],
+    "circles": [],
+    "arcs": [
+      {
+        "x1": 40,
+        "y1": 20,
+        "x2": 56,
+        "y2": 36,
+        "x3": 56,
+        "y3": 28,
+        "x4": 40,
+        "y4": 24,
+        "style": "Normal"
+      },
+      {
+        "x1": 56,
+        "y1": 20,
+        "x2": 72,
+        "y2": 36,
+        "x3": 56,
+        "y3": 28,
+        "x4": 72,
+        "y4": 32,
+        "style": "Normal"
+      },
+      {
+        "x1": 40,
+        "y1": 36,
+        "x2": 56,
+        "y2": 52,
+        "x3": 56,
+        "y3": 44,
+        "x4": 40,
+        "y4": 40,
+        "style": "Normal"
+      },
+      {
+        "x1": 56,
+        "y1": 36,
+        "x2": 72,
+        "y2": 52,
+        "x3": 56,
+        "y3": 44,
+        "x4": 72,
+        "y4": 48,
+        "style": "Normal"
+      }
+    ],
+    "rects": [],
+    "pins": [
+      {
+        "x": 16,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "+",
+        "spiceOrder": 1
+      },
+      {
+        "x": 16,
+        "y": 64,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "-",
+        "spiceOrder": 2
+      }
+    ],
+    "attrs": {
+      "Value": "D",
+      "Prefix": "D",
+      "Description": "Light Emitting Diode"
+    }
+  },
+  "tvsdiode": {
+    "file": "TVSdiode.asy",
+    "prefix": "D",
+    "bbox": {
+      "minX": -4,
+      "minY": 0,
+      "maxX": 36,
+      "maxY": 64,
+      "w": 40,
+      "h": 64
+    },
+    "lines": [
+      {
+        "x1": 0,
+        "y1": 32,
+        "x2": -4,
+        "y2": 36,
+        "style": "Normal"
+      },
+      {
+        "x1": 32,
+        "y1": 32,
+        "x2": 36,
+        "y2": 28,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 32,
+        "x2": 32,
+        "y2": 32,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 8,
+        "x2": 32,
+        "y2": 8,
+        "style": "Normal"
+      },
+      {
+        "x1": 32,
+        "y1": 8,
+        "x2": 16,
+        "y2": 32,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 8,
+        "x2": 16,
+        "y2": 32,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 56,
+        "x2": 32,
+        "y2": 56,
+        "style": "Normal"
+      },
+      {
+        "x1": 32,
+        "y1": 56,
+        "x2": 16,
+        "y2": 32,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 56,
+        "x2": 16,
+        "y2": 32,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 0,
+        "x2": 16,
+        "y2": 8,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 56,
+        "x2": 16,
+        "y2": 64,
+        "style": "Normal"
+      }
+    ],
+    "circles": [],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 16,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "+",
+        "spiceOrder": 1
+      },
+      {
+        "x": 16,
+        "y": 64,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "-",
+        "spiceOrder": 2
+      }
+    ],
+    "attrs": {
+      "Value": "D",
+      "Prefix": "D",
+      "Description": "Zener Diode"
+    }
+  },
+  "varactor": {
+    "file": "varactor.asy",
+    "prefix": "D",
+    "bbox": {
+      "minX": 0,
+      "minY": 0,
+      "maxX": 32,
+      "maxY": 64,
+      "w": 32,
+      "h": 64
+    },
+    "lines": [
+      {
+        "x1": 0,
+        "y1": 36,
+        "x2": 32,
+        "y2": 36,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 44,
+        "x2": 32,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 16,
+        "x2": 32,
+        "y2": 16,
+        "style": "Normal"
+      },
+      {
+        "x1": 32,
+        "y1": 16,
+        "x2": 16,
+        "y2": 36,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 16,
+        "x2": 16,
+        "y2": 36,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 0,
+        "x2": 16,
+        "y2": 16,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 44,
+        "x2": 16,
+        "y2": 64,
+        "style": "Normal"
+      }
+    ],
+    "circles": [],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 16,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "+",
+        "spiceOrder": 1
+      },
+      {
+        "x": 16,
+        "y": 64,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "-",
+        "spiceOrder": 2
+      }
+    ],
+    "attrs": {
+      "Value": "D",
+      "Prefix": "D",
+      "Description": "Diode"
+    }
+  },
+  "npn": {
+    "file": "npn.asy",
+    "prefix": "Q",
+    "bbox": {
+      "minX": 0,
+      "minY": 0,
+      "maxX": 64,
+      "maxY": 96,
+      "w": 64,
+      "h": 96
+    },
+    "lines": [
+      {
+        "x1": 44,
+        "y1": 76,
+        "x2": 36,
+        "y2": 84,
+        "style": "Normal"
+      },
+      {
+        "x1": 64,
+        "y1": 96,
+        "x2": 44,
+        "y2": 76,
+        "style": "Normal"
+      },
+      {
+        "x1": 64,
+        "y1": 96,
+        "x2": 36,
+        "y2": 84,
+        "style": "Normal"
+      },
+      {
+        "x1": 40,
+        "y1": 80,
+        "x2": 16,
+        "y2": 64,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 80,
+        "x2": 16,
+        "y2": 16,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 32,
+        "x2": 64,
+        "y2": 0,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 48,
+        "x2": 0,
+        "y2": 48,
+        "style": "Normal"
+      }
+    ],
+    "circles": [],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 64,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "C",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 48,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "B",
+        "spiceOrder": 2
+      },
+      {
+        "x": 64,
+        "y": 96,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "E",
+        "spiceOrder": 3
+      }
+    ],
+    "attrs": {
+      "Value": "NPN",
+      "Prefix": "QN",
+      "Description": "Bipolar NPN transistor"
+    }
+  },
+  "npn2": {
+    "file": "npn2.asy",
+    "prefix": "Q",
+    "bbox": {
+      "minX": 0,
+      "minY": 0,
+      "maxX": 64,
+      "maxY": 96,
+      "w": 64,
+      "h": 96
+    },
+    "lines": [
+      {
+        "x1": 44,
+        "y1": 76,
+        "x2": 36,
+        "y2": 84,
+        "style": "Normal"
+      },
+      {
+        "x1": 64,
+        "y1": 96,
+        "x2": 44,
+        "y2": 76,
+        "style": "Normal"
+      },
+      {
+        "x1": 64,
+        "y1": 96,
+        "x2": 36,
+        "y2": 84,
+        "style": "Normal"
+      },
+      {
+        "x1": 40,
+        "y1": 80,
+        "x2": 16,
+        "y2": 64,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 32,
+        "x2": 64,
+        "y2": 0,
+        "style": "Normal"
+      },
+      {
+        "x1": 12,
+        "y1": 48,
+        "x2": 0,
+        "y2": 48,
+        "style": "Normal"
+      }
+    ],
+    "circles": [],
+    "arcs": [],
+    "rects": [
+      {
+        "x1": 16,
+        "y1": 72,
+        "x2": 12,
+        "y2": 24,
+        "style": "Normal"
+      }
+    ],
+    "pins": [
+      {
+        "x": 64,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "C",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 48,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "B",
+        "spiceOrder": 2
+      },
+      {
+        "x": 64,
+        "y": 96,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "E",
+        "spiceOrder": 3
+      }
+    ],
+    "attrs": {
+      "Value": "NPN",
+      "Prefix": "QN",
+      "Description": "Bipolar NPN transistor"
+    }
+  },
+  "npn3": {
+    "file": "npn3.asy",
+    "prefix": "Q",
+    "bbox": {
+      "minX": 0,
+      "minY": 0,
+      "maxX": 64,
+      "maxY": 96,
+      "w": 64,
+      "h": 96
+    },
+    "lines": [
+      {
+        "x1": 44,
+        "y1": 76,
+        "x2": 36,
+        "y2": 84,
+        "style": "Normal"
+      },
+      {
+        "x1": 64,
+        "y1": 96,
+        "x2": 44,
+        "y2": 76,
+        "style": "Normal"
+      },
+      {
+        "x1": 64,
+        "y1": 96,
+        "x2": 36,
+        "y2": 84,
+        "style": "Normal"
+      },
+      {
+        "x1": 40,
+        "y1": 80,
+        "x2": 20,
+        "y2": 64,
+        "style": "Normal"
+      },
+      {
+        "x1": 20,
+        "y1": 72,
+        "x2": 20,
+        "y2": 24,
+        "style": "Normal"
+      },
+      {
+        "x1": 12,
+        "y1": 72,
+        "x2": 12,
+        "y2": 24,
+        "style": "Normal"
+      },
+      {
+        "x1": 20,
+        "y1": 72,
+        "x2": 12,
+        "y2": 72,
+        "style": "Normal"
+      },
+      {
+        "x1": 20,
+        "y1": 24,
+        "x2": 12,
+        "y2": 24,
+        "style": "Normal"
+      },
+      {
+        "x1": 20,
+        "y1": 32,
+        "x2": 64,
+        "y2": 0,
+        "style": "Normal"
+      },
+      {
+        "x1": 12,
+        "y1": 48,
+        "x2": 0,
+        "y2": 48,
+        "style": "Normal"
+      }
+    ],
+    "circles": [],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 64,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "C",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 48,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "B",
+        "spiceOrder": 2
+      },
+      {
+        "x": 64,
+        "y": 96,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "E",
+        "spiceOrder": 3
+      }
+    ],
+    "attrs": {
+      "Value": "NPN",
+      "Prefix": "QN",
+      "Description": "Bipolar NPN transistor"
+    }
+  },
+  "npn4": {
+    "file": "npn4.asy",
+    "prefix": "Q",
+    "bbox": {
+      "minX": 0,
+      "minY": 0,
+      "maxX": 64,
+      "maxY": 96,
+      "w": 64,
+      "h": 96
+    },
+    "lines": [
+      {
+        "x1": 16,
+        "y1": 48,
+        "x2": 0,
+        "y2": 48,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 32,
+        "x2": 64,
+        "y2": 0,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 80,
+        "x2": 16,
+        "y2": 16,
+        "style": "Normal"
+      },
+      {
+        "x1": 40,
+        "y1": 80,
+        "x2": 16,
+        "y2": 64,
+        "style": "Normal"
+      },
+      {
+        "x1": 64,
+        "y1": 96,
+        "x2": 36,
+        "y2": 84,
+        "style": "Normal"
+      },
+      {
+        "x1": 64,
+        "y1": 96,
+        "x2": 44,
+        "y2": 76,
+        "style": "Normal"
+      },
+      {
+        "x1": 44,
+        "y1": 76,
+        "x2": 36,
+        "y2": 84,
+        "style": "Normal"
+      },
+      {
+        "x1": 40,
+        "y1": 16,
+        "x2": 48,
+        "y2": 28,
+        "style": "Normal"
+      },
+      {
+        "x1": 64,
+        "y1": 48,
+        "x2": 56,
+        "y2": 40,
+        "style": "Normal"
+      },
+      {
+        "x1": 40,
+        "y1": 32,
+        "x2": 56,
+        "y2": 20,
+        "style": "Normal"
+      },
+      {
+        "x1": 48,
+        "y1": 44,
+        "x2": 64,
+        "y2": 32,
+        "style": "Normal"
+      },
+      {
+        "x1": 48,
+        "y1": 44,
+        "x2": 48,
+        "y2": 28,
+        "style": "Normal"
+      },
+      {
+        "x1": 64,
+        "y1": 32,
+        "x2": 48,
+        "y2": 28,
+        "style": "Normal"
+      }
+    ],
+    "circles": [],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 64,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "C",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 48,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "B",
+        "spiceOrder": 2
+      },
+      {
+        "x": 64,
+        "y": 96,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "E",
+        "spiceOrder": 3
+      },
+      {
+        "x": 64,
+        "y": 48,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "S",
+        "spiceOrder": 4
+      }
+    ],
+    "attrs": {
+      "Value": "NPN",
+      "Prefix": "QN",
+      "Description": "Bipolar NPN transistor with substrate node. You would normally use this with your own .model statement."
+    }
+  },
+  "pnp": {
+    "file": "pnp.asy",
+    "prefix": "Q",
+    "bbox": {
+      "minX": 0,
+      "minY": 0,
+      "maxX": 64,
+      "maxY": 96,
+      "w": 64,
+      "h": 96
+    },
+    "lines": [
+      {
+        "x1": 16,
+        "y1": 64,
+        "x2": 44,
+        "y2": 76,
+        "style": "Normal"
+      },
+      {
+        "x1": 44,
+        "y1": 76,
+        "x2": 36,
+        "y2": 84,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 64,
+        "x2": 36,
+        "y2": 84,
+        "style": "Normal"
+      },
+      {
+        "x1": 40,
+        "y1": 80,
+        "x2": 64,
+        "y2": 96,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 80,
+        "x2": 16,
+        "y2": 16,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 32,
+        "x2": 64,
+        "y2": 0,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 48,
+        "x2": 0,
+        "y2": 48,
+        "style": "Normal"
+      }
+    ],
+    "circles": [],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 64,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "C",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 48,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "B",
+        "spiceOrder": 2
+      },
+      {
+        "x": 64,
+        "y": 96,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "E",
+        "spiceOrder": 3
+      }
+    ],
+    "attrs": {
+      "Value": "PNP",
+      "Prefix": "QP",
+      "Description": "Bipolar PNP transistor"
+    }
+  },
+  "pnp2": {
+    "file": "pnp2.asy",
+    "prefix": "Q",
+    "bbox": {
+      "minX": 0,
+      "minY": 0,
+      "maxX": 64,
+      "maxY": 96,
+      "w": 64,
+      "h": 96
+    },
+    "lines": [
+      {
+        "x1": 16,
+        "y1": 64,
+        "x2": 44,
+        "y2": 76,
+        "style": "Normal"
+      },
+      {
+        "x1": 44,
+        "y1": 76,
+        "x2": 36,
+        "y2": 84,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 64,
+        "x2": 36,
+        "y2": 84,
+        "style": "Normal"
+      },
+      {
+        "x1": 40,
+        "y1": 80,
+        "x2": 64,
+        "y2": 96,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 32,
+        "x2": 64,
+        "y2": 0,
+        "style": "Normal"
+      },
+      {
+        "x1": 12,
+        "y1": 48,
+        "x2": 0,
+        "y2": 48,
+        "style": "Normal"
+      }
+    ],
+    "circles": [],
+    "arcs": [],
+    "rects": [
+      {
+        "x1": 16,
+        "y1": 72,
+        "x2": 12,
+        "y2": 24,
+        "style": "Normal"
+      }
+    ],
+    "pins": [
+      {
+        "x": 64,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "C",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 48,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "B",
+        "spiceOrder": 2
+      },
+      {
+        "x": 64,
+        "y": 96,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "E",
+        "spiceOrder": 3
+      }
+    ],
+    "attrs": {
+      "Value": "PNP",
+      "Prefix": "QP",
+      "Description": "Bipolar PNP transistor"
+    }
+  },
+  "pnp4": {
+    "file": "pnp4.asy",
+    "prefix": "Q",
+    "bbox": {
+      "minX": 0,
+      "minY": 0,
+      "maxX": 64,
+      "maxY": 96,
+      "w": 64,
+      "h": 96
+    },
+    "lines": [
+      {
+        "x1": 16,
+        "y1": 64,
+        "x2": 44,
+        "y2": 76,
+        "style": "Normal"
+      },
+      {
+        "x1": 44,
+        "y1": 76,
+        "x2": 36,
+        "y2": 84,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 64,
+        "x2": 36,
+        "y2": 84,
+        "style": "Normal"
+      },
+      {
+        "x1": 40,
+        "y1": 80,
+        "x2": 64,
+        "y2": 96,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 80,
+        "x2": 16,
+        "y2": 16,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 32,
+        "x2": 64,
+        "y2": 0,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 48,
+        "x2": 0,
+        "y2": 48,
+        "style": "Normal"
+      },
+      {
+        "x1": 40,
+        "y1": 16,
+        "x2": 48,
+        "y2": 28,
+        "style": "Normal"
+      },
+      {
+        "x1": 64,
+        "y1": 48,
+        "x2": 56,
+        "y2": 40,
+        "style": "Normal"
+      },
+      {
+        "x1": 40,
+        "y1": 32,
+        "x2": 56,
+        "y2": 20,
+        "style": "Normal"
+      },
+      {
+        "x1": 48,
+        "y1": 44,
+        "x2": 64,
+        "y2": 32,
+        "style": "Normal"
+      },
+      {
+        "x1": 40,
+        "y1": 32,
+        "x2": 56,
+        "y2": 40,
+        "style": "Normal"
+      },
+      {
+        "x1": 56,
+        "y1": 20,
+        "x2": 56,
+        "y2": 40,
+        "style": "Normal"
+      }
+    ],
+    "circles": [],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 64,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "C",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 48,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "B",
+        "spiceOrder": 2
+      },
+      {
+        "x": 64,
+        "y": 96,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "E",
+        "spiceOrder": 3
+      },
+      {
+        "x": 64,
+        "y": 48,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "S",
+        "spiceOrder": 4
+      }
+    ],
+    "attrs": {
+      "Value": "PNP",
+      "Prefix": "QP",
+      "Description": "Bipolar PNP transistor with substrate node. You would normally use this with your own .model statement."
+    }
+  },
+  "lpnp": {
+    "file": "lpnp.asy",
+    "prefix": "Q",
+    "bbox": {
+      "minX": 0,
+      "minY": 0,
+      "maxX": 64,
+      "maxY": 96,
+      "w": 64,
+      "h": 96
+    },
+    "lines": [
+      {
+        "x1": 16,
+        "y1": 64,
+        "x2": 44,
+        "y2": 76,
+        "style": "Normal"
+      },
+      {
+        "x1": 44,
+        "y1": 76,
+        "x2": 36,
+        "y2": 84,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 64,
+        "x2": 36,
+        "y2": 84,
+        "style": "Normal"
+      },
+      {
+        "x1": 40,
+        "y1": 80,
+        "x2": 64,
+        "y2": 96,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 80,
+        "x2": 16,
+        "y2": 16,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 32,
+        "x2": 64,
+        "y2": 0,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 48,
+        "x2": 0,
+        "y2": 48,
+        "style": "Normal"
+      },
+      {
+        "x1": 52,
+        "y1": 48,
+        "x2": 64,
+        "y2": 48,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 48,
+        "x2": 36,
+        "y2": 48,
+        "style": "Normal"
+      },
+      {
+        "x1": 36,
+        "y1": 40,
+        "x2": 36,
+        "y2": 56,
+        "style": "Normal"
+      },
+      {
+        "x1": 52,
+        "y1": 40,
+        "x2": 52,
+        "y2": 56,
+        "style": "Normal"
+      },
+      {
+        "x1": 52,
+        "y1": 40,
+        "x2": 36,
+        "y2": 48,
+        "style": "Normal"
+      },
+      {
+        "x1": 52,
+        "y1": 56,
+        "x2": 36,
+        "y2": 48,
+        "style": "Normal"
+      }
+    ],
+    "circles": [],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 64,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "C",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 48,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "B",
+        "spiceOrder": 2
+      },
+      {
+        "x": 64,
+        "y": 96,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "E",
+        "spiceOrder": 3
+      },
+      {
+        "x": 64,
+        "y": 48,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "S",
+        "spiceOrder": 4
+      }
+    ],
+    "attrs": {
+      "Value": "LPNP",
+      "Prefix": "QP",
+      "Description": "Bipolar Lateral PNP transistor. You would normally use this with your own .model statement."
+    }
+  },
+  "nmos": {
+    "file": "nmos.asy",
+    "prefix": "M",
+    "bbox": {
+      "minX": 0,
+      "minY": 0,
+      "maxX": 48,
+      "maxY": 96,
+      "w": 48,
+      "h": 96
+    },
+    "lines": [
+      {
+        "x1": 48,
+        "y1": 48,
+        "x2": 48,
+        "y2": 96,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 80,
+        "x2": 48,
+        "y2": 80,
+        "style": "Normal"
+      },
+      {
+        "x1": 40,
+        "y1": 48,
+        "x2": 48,
+        "y2": 48,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 48,
+        "x2": 40,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 48,
+        "x2": 40,
+        "y2": 52,
+        "style": "Normal"
+      },
+      {
+        "x1": 40,
+        "y1": 44,
+        "x2": 40,
+        "y2": 52,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 8,
+        "x2": 16,
+        "y2": 24,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 40,
+        "x2": 16,
+        "y2": 56,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 72,
+        "x2": 16,
+        "y2": 88,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 80,
+        "x2": 8,
+        "y2": 80,
+        "style": "Normal"
+      },
+      {
+        "x1": 8,
+        "y1": 16,
+        "x2": 8,
+        "y2": 80,
+        "style": "Normal"
+      },
+      {
+        "x1": 48,
+        "y1": 16,
+        "x2": 16,
+        "y2": 16,
+        "style": "Normal"
+      },
+      {
+        "x1": 48,
+        "y1": 0,
+        "x2": 48,
+        "y2": 16,
+        "style": "Normal"
+      }
+    ],
+    "circles": [],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 48,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "D",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 80,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "G",
+        "spiceOrder": 2
+      },
+      {
+        "x": 48,
+        "y": 96,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "S",
+        "spiceOrder": 3
+      }
+    ],
+    "attrs": {
+      "Value": "NMOS",
+      "Prefix": "MN",
+      "Description": "N-Channel MOSFET transistor"
+    }
+  },
+  "nmos4": {
+    "file": "nmos4.asy",
+    "prefix": "M",
+    "bbox": {
+      "minX": 0,
+      "minY": 0,
+      "maxX": 48,
+      "maxY": 96,
+      "w": 48,
+      "h": 96
+    },
+    "lines": [
+      {
+        "x1": 48,
+        "y1": 80,
+        "x2": 48,
+        "y2": 96,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 80,
+        "x2": 48,
+        "y2": 80,
+        "style": "Normal"
+      },
+      {
+        "x1": 40,
+        "y1": 48,
+        "x2": 48,
+        "y2": 48,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 48,
+        "x2": 40,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 48,
+        "x2": 40,
+        "y2": 52,
+        "style": "Normal"
+      },
+      {
+        "x1": 40,
+        "y1": 44,
+        "x2": 40,
+        "y2": 52,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 8,
+        "x2": 16,
+        "y2": 24,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 40,
+        "x2": 16,
+        "y2": 56,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 72,
+        "x2": 16,
+        "y2": 88,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 80,
+        "x2": 8,
+        "y2": 80,
+        "style": "Normal"
+      },
+      {
+        "x1": 8,
+        "y1": 16,
+        "x2": 8,
+        "y2": 80,
+        "style": "Normal"
+      },
+      {
+        "x1": 48,
+        "y1": 16,
+        "x2": 16,
+        "y2": 16,
+        "style": "Normal"
+      },
+      {
+        "x1": 48,
+        "y1": 0,
+        "x2": 48,
+        "y2": 16,
+        "style": "Normal"
+      }
+    ],
+    "circles": [],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 48,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "D",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 80,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "G",
+        "spiceOrder": 2
+      },
+      {
+        "x": 48,
+        "y": 96,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "S",
+        "spiceOrder": 3
+      },
+      {
+        "x": 48,
+        "y": 48,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "B",
+        "spiceOrder": 4
+      }
+    ],
+    "attrs": {
+      "Value": "NMOS",
+      "Prefix": "MN",
+      "Description": "N-Channel MOSFET transistor with explicit substrate connection(used for monolithic MOSFETS)"
+    }
+  },
+  "pmos": {
+    "file": "pmos.asy",
+    "prefix": "M",
+    "bbox": {
+      "minX": 0,
+      "minY": 0,
+      "maxX": 48,
+      "maxY": 96,
+      "w": 48,
+      "h": 96
+    },
+    "lines": [
+      {
+        "x1": 48,
+        "y1": 48,
+        "x2": 48,
+        "y2": 96,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 80,
+        "x2": 48,
+        "y2": 80,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 48,
+        "x2": 24,
+        "y2": 48,
+        "style": "Normal"
+      },
+      {
+        "x1": 48,
+        "y1": 48,
+        "x2": 24,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 48,
+        "y1": 48,
+        "x2": 24,
+        "y2": 52,
+        "style": "Normal"
+      },
+      {
+        "x1": 24,
+        "y1": 44,
+        "x2": 24,
+        "y2": 52,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 8,
+        "x2": 16,
+        "y2": 24,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 40,
+        "x2": 16,
+        "y2": 56,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 72,
+        "x2": 16,
+        "y2": 88,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 80,
+        "x2": 8,
+        "y2": 80,
+        "style": "Normal"
+      },
+      {
+        "x1": 8,
+        "y1": 16,
+        "x2": 8,
+        "y2": 80,
+        "style": "Normal"
+      },
+      {
+        "x1": 48,
+        "y1": 16,
+        "x2": 16,
+        "y2": 16,
+        "style": "Normal"
+      },
+      {
+        "x1": 48,
+        "y1": 0,
+        "x2": 48,
+        "y2": 16,
+        "style": "Normal"
+      }
+    ],
+    "circles": [],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 48,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "D",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 80,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "G",
+        "spiceOrder": 2
+      },
+      {
+        "x": 48,
+        "y": 96,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "S",
+        "spiceOrder": 3
+      }
+    ],
+    "attrs": {
+      "Value": "PMOS",
+      "Prefix": "MP",
+      "Description": "P-Channel MOSFET transistor"
+    }
+  },
+  "pmos4": {
+    "file": "pmos4.asy",
+    "prefix": "M",
+    "bbox": {
+      "minX": 0,
+      "minY": 0,
+      "maxX": 48,
+      "maxY": 96,
+      "w": 48,
+      "h": 96
+    },
+    "lines": [
+      {
+        "x1": 48,
+        "y1": 80,
+        "x2": 48,
+        "y2": 96,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 80,
+        "x2": 48,
+        "y2": 80,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 48,
+        "x2": 24,
+        "y2": 48,
+        "style": "Normal"
+      },
+      {
+        "x1": 48,
+        "y1": 48,
+        "x2": 24,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 48,
+        "y1": 48,
+        "x2": 24,
+        "y2": 52,
+        "style": "Normal"
+      },
+      {
+        "x1": 24,
+        "y1": 44,
+        "x2": 24,
+        "y2": 52,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 8,
+        "x2": 16,
+        "y2": 24,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 40,
+        "x2": 16,
+        "y2": 56,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 72,
+        "x2": 16,
+        "y2": 88,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 80,
+        "x2": 8,
+        "y2": 80,
+        "style": "Normal"
+      },
+      {
+        "x1": 8,
+        "y1": 16,
+        "x2": 8,
+        "y2": 80,
+        "style": "Normal"
+      },
+      {
+        "x1": 48,
+        "y1": 16,
+        "x2": 16,
+        "y2": 16,
+        "style": "Normal"
+      },
+      {
+        "x1": 48,
+        "y1": 0,
+        "x2": 48,
+        "y2": 16,
+        "style": "Normal"
+      }
+    ],
+    "circles": [],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 48,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "D",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 80,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "G",
+        "spiceOrder": 2
+      },
+      {
+        "x": 48,
+        "y": 96,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "S",
+        "spiceOrder": 3
+      },
+      {
+        "x": 48,
+        "y": 48,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "B",
+        "spiceOrder": 4
+      }
+    ],
+    "attrs": {
+      "Value": "PMOS",
+      "Prefix": "MP",
+      "Description": "P-Channel MOSFET transistor with explicit substrate connection(used for monolithic MOSFETS)"
+    }
+  },
+  "njf": {
+    "file": "njf.asy",
+    "prefix": "J",
+    "bbox": {
+      "minX": 0,
+      "minY": 0,
+      "maxX": 48,
+      "maxY": 96,
+      "w": 48,
+      "h": 96
+    },
+    "lines": [
+      {
+        "x1": 16,
+        "y1": 16,
+        "x2": 16,
+        "y2": 80,
+        "style": "Normal"
+      },
+      {
+        "x1": 48,
+        "y1": 72,
+        "x2": 48,
+        "y2": 96,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 72,
+        "x2": 48,
+        "y2": 72,
+        "style": "Normal"
+      },
+      {
+        "x1": 48,
+        "y1": 24,
+        "x2": 48,
+        "y2": 0,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 24,
+        "x2": 48,
+        "y2": 24,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 64,
+        "x2": 4,
+        "y2": 64,
+        "style": "Normal"
+      },
+      {
+        "x1": 4,
+        "y1": 68,
+        "x2": 16,
+        "y2": 64,
+        "style": "Normal"
+      },
+      {
+        "x1": 4,
+        "y1": 60,
+        "x2": 16,
+        "y2": 64,
+        "style": "Normal"
+      },
+      {
+        "x1": 4,
+        "y1": 60,
+        "x2": 4,
+        "y2": 68,
+        "style": "Normal"
+      }
+    ],
+    "circles": [],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 48,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "D",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 64,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "G",
+        "spiceOrder": 2
+      },
+      {
+        "x": 48,
+        "y": 96,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "S",
+        "spiceOrder": 3
+      }
+    ],
+    "attrs": {
+      "Value": "NJF",
+      "Prefix": "JN",
+      "Description": "N-Channel JFET"
+    }
+  },
+  "pjf": {
+    "file": "pjf.asy",
+    "prefix": "J",
+    "bbox": {
+      "minX": 0,
+      "minY": 0,
+      "maxX": 48,
+      "maxY": 96,
+      "w": 48,
+      "h": 96
+    },
+    "lines": [
+      {
+        "x1": 16,
+        "y1": 16,
+        "x2": 16,
+        "y2": 80,
+        "style": "Normal"
+      },
+      {
+        "x1": 48,
+        "y1": 72,
+        "x2": 48,
+        "y2": 96,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 72,
+        "x2": 48,
+        "y2": 72,
+        "style": "Normal"
+      },
+      {
+        "x1": 48,
+        "y1": 24,
+        "x2": 48,
+        "y2": 0,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 24,
+        "x2": 48,
+        "y2": 24,
+        "style": "Normal"
+      },
+      {
+        "x1": 12,
+        "y1": 64,
+        "x2": 16,
+        "y2": 64,
+        "style": "Normal"
+      },
+      {
+        "x1": 12,
+        "y1": 68,
+        "x2": 0,
+        "y2": 64,
+        "style": "Normal"
+      },
+      {
+        "x1": 12,
+        "y1": 60,
+        "x2": 0,
+        "y2": 64,
+        "style": "Normal"
+      },
+      {
+        "x1": 12,
+        "y1": 60,
+        "x2": 12,
+        "y2": 68,
+        "style": "Normal"
+      }
+    ],
+    "circles": [],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 48,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "D",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 64,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "G",
+        "spiceOrder": 2
+      },
+      {
+        "x": 48,
+        "y": 96,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "S",
+        "spiceOrder": 3
+      }
+    ],
+    "attrs": {
+      "Value": "PJF",
+      "Prefix": "JP",
+      "Description": "P-Channel JFET transistor"
+    }
+  },
+  "mesfet": {
+    "file": "mesfet.asy",
+    "prefix": "J",
+    "bbox": {
+      "minX": 0,
+      "minY": 0,
+      "maxX": 48,
+      "maxY": 96,
+      "w": 48,
+      "h": 96
+    },
+    "lines": [
+      {
+        "x1": 16,
+        "y1": 12,
+        "x2": 16,
+        "y2": 84,
+        "style": "Normal"
+      },
+      {
+        "x1": 48,
+        "y1": 80,
+        "x2": 48,
+        "y2": 96,
+        "style": "Normal"
+      },
+      {
+        "x1": 48,
+        "y1": 16,
+        "x2": 48,
+        "y2": 0,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 16,
+        "x2": 48,
+        "y2": 16,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 80,
+        "x2": 16,
+        "y2": 80,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 80,
+        "x2": 48,
+        "y2": 80,
+        "style": "Normal"
+      }
+    ],
+    "circles": [],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 48,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "D",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 80,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "G",
+        "spiceOrder": 2
+      },
+      {
+        "x": 48,
+        "y": 96,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "S",
+        "spiceOrder": 3
+      }
+    ],
+    "attrs": {
+      "Value": "NMF",
+      "Prefix": "Z",
+      "Description": "GaAs MESFET transistor Note: You must supply the .model for this device"
+    }
+  },
+  "e": {
+    "file": "e.asy",
+    "prefix": "E",
+    "bbox": {
+      "minX": -48,
+      "minY": 16,
+      "maxX": 32,
+      "maxY": 96,
+      "w": 80,
+      "h": 80
+    },
+    "lines": [
+      {
+        "x1": -48,
+        "y1": 32,
+        "x2": -32,
+        "y2": 32,
+        "style": "Normal"
+      },
+      {
+        "x1": -32,
+        "y1": 32,
+        "x2": -24,
+        "y2": 36,
+        "style": "Normal"
+      },
+      {
+        "x1": -48,
+        "y1": 80,
+        "x2": -32,
+        "y2": 80,
+        "style": "Normal"
+      },
+      {
+        "x1": -32,
+        "y1": 80,
+        "x2": -24,
+        "y2": 76,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 16,
+        "x2": 0,
+        "y2": 24,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 96,
+        "x2": 0,
+        "y2": 88,
+        "style": "Normal"
+      },
+      {
+        "x1": -48,
+        "y1": 72,
+        "x2": -40,
+        "y2": 72,
+        "style": "Normal"
+      },
+      {
+        "x1": -48,
+        "y1": 40,
+        "x2": -40,
+        "y2": 40,
+        "style": "Normal"
+      },
+      {
+        "x1": -44,
+        "y1": 36,
+        "x2": -44,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": -4,
+        "y1": 72,
+        "x2": 4,
+        "y2": 72,
+        "style": "Normal"
+      },
+      {
+        "x1": -4,
+        "y1": 40,
+        "x2": 4,
+        "y2": 40,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 36,
+        "x2": 0,
+        "y2": 44,
+        "style": "Normal"
+      }
+    ],
+    "circles": [
+      {
+        "cx": 0,
+        "cy": 56,
+        "r": 32,
+        "style": "Normal"
+      }
+    ],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 0,
+        "y": 16,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "+",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 96,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "-",
+        "spiceOrder": 2
+      },
+      {
+        "x": -48,
+        "y": 32,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "P",
+        "spiceOrder": 3
+      },
+      {
+        "x": -48,
+        "y": 80,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "N",
+        "spiceOrder": 4
+      }
+    ],
+    "attrs": {
+      "Value": "E",
+      "Prefix": "E",
+      "Description": "Voltage dependent voltage source"
+    }
+  },
+  "e2": {
+    "file": "e2.asy",
+    "prefix": "E",
+    "bbox": {
+      "minX": -48,
+      "minY": 16,
+      "maxX": 32,
+      "maxY": 96,
+      "w": 80,
+      "h": 80
+    },
+    "lines": [
+      {
+        "x1": -48,
+        "y1": 32,
+        "x2": -32,
+        "y2": 32,
+        "style": "Normal"
+      },
+      {
+        "x1": -32,
+        "y1": 32,
+        "x2": -24,
+        "y2": 36,
+        "style": "Normal"
+      },
+      {
+        "x1": -48,
+        "y1": 80,
+        "x2": -32,
+        "y2": 80,
+        "style": "Normal"
+      },
+      {
+        "x1": -32,
+        "y1": 80,
+        "x2": -24,
+        "y2": 76,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 16,
+        "x2": 0,
+        "y2": 24,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 96,
+        "x2": 0,
+        "y2": 88,
+        "style": "Normal"
+      },
+      {
+        "x1": -48,
+        "y1": 72,
+        "x2": -40,
+        "y2": 72,
+        "style": "Normal"
+      },
+      {
+        "x1": -44,
+        "y1": 76,
+        "x2": -44,
+        "y2": 68,
+        "style": "Normal"
+      },
+      {
+        "x1": -48,
+        "y1": 40,
+        "x2": -40,
+        "y2": 40,
+        "style": "Normal"
+      },
+      {
+        "x1": -4,
+        "y1": 72,
+        "x2": 4,
+        "y2": 72,
+        "style": "Normal"
+      },
+      {
+        "x1": -4,
+        "y1": 40,
+        "x2": 4,
+        "y2": 40,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 36,
+        "x2": 0,
+        "y2": 44,
+        "style": "Normal"
+      }
+    ],
+    "circles": [
+      {
+        "cx": 0,
+        "cy": 56,
+        "r": 32,
+        "style": "Normal"
+      }
+    ],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 0,
+        "y": 16,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "+",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 96,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "-",
+        "spiceOrder": 2
+      },
+      {
+        "x": -48,
+        "y": 80,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "P",
+        "spiceOrder": 3
+      },
+      {
+        "x": -48,
+        "y": 32,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "N",
+        "spiceOrder": 4
+      }
+    ],
+    "attrs": {
+      "Value": "E",
+      "Prefix": "E",
+      "Description": "Voltage dependent voltage source"
+    }
+  },
+  "g": {
+    "file": "g.asy",
+    "prefix": "G",
+    "bbox": {
+      "minX": -48,
+      "minY": 16,
+      "maxX": 32,
+      "maxY": 96,
+      "w": 80,
+      "h": 80
+    },
+    "lines": [
+      {
+        "x1": -48,
+        "y1": 32,
+        "x2": -32,
+        "y2": 32,
+        "style": "Normal"
+      },
+      {
+        "x1": -32,
+        "y1": 32,
+        "x2": -24,
+        "y2": 36,
+        "style": "Normal"
+      },
+      {
+        "x1": -48,
+        "y1": 80,
+        "x2": -32,
+        "y2": 80,
+        "style": "Normal"
+      },
+      {
+        "x1": -32,
+        "y1": 80,
+        "x2": -24,
+        "y2": 76,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 16,
+        "x2": 0,
+        "y2": 24,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 96,
+        "x2": 0,
+        "y2": 88,
+        "style": "Normal"
+      },
+      {
+        "x1": -48,
+        "y1": 72,
+        "x2": -40,
+        "y2": 72,
+        "style": "Normal"
+      },
+      {
+        "x1": -48,
+        "y1": 40,
+        "x2": -40,
+        "y2": 40,
+        "style": "Normal"
+      },
+      {
+        "x1": -44,
+        "y1": 36,
+        "x2": -44,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 4,
+        "y1": 52,
+        "x2": 0,
+        "y2": 40,
+        "style": "Normal"
+      },
+      {
+        "x1": -4,
+        "y1": 52,
+        "x2": 0,
+        "y2": 40,
+        "style": "Normal"
+      },
+      {
+        "x1": -4,
+        "y1": 52,
+        "x2": 4,
+        "y2": 52,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 52,
+        "x2": 0,
+        "y2": 72,
+        "style": "Normal"
+      }
+    ],
+    "circles": [
+      {
+        "cx": 0,
+        "cy": 56,
+        "r": 32,
+        "style": "Normal"
+      }
+    ],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 0,
+        "y": 96,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "+",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 16,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "-",
+        "spiceOrder": 2
+      },
+      {
+        "x": -48,
+        "y": 32,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "NC+",
+        "spiceOrder": 3
+      },
+      {
+        "x": -48,
+        "y": 80,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "NC-",
+        "spiceOrder": 4
+      }
+    ],
+    "attrs": {
+      "Value": "G",
+      "Prefix": "G",
+      "Description": "Voltage dependent current source"
+    }
+  },
+  "g2": {
+    "file": "g2.asy",
+    "prefix": "G",
+    "bbox": {
+      "minX": -48,
+      "minY": 16,
+      "maxX": 32,
+      "maxY": 96,
+      "w": 80,
+      "h": 80
+    },
+    "lines": [
+      {
+        "x1": -48,
+        "y1": 32,
+        "x2": -32,
+        "y2": 32,
+        "style": "Normal"
+      },
+      {
+        "x1": -32,
+        "y1": 32,
+        "x2": -24,
+        "y2": 36,
+        "style": "Normal"
+      },
+      {
+        "x1": -48,
+        "y1": 80,
+        "x2": -32,
+        "y2": 80,
+        "style": "Normal"
+      },
+      {
+        "x1": -32,
+        "y1": 80,
+        "x2": -24,
+        "y2": 76,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 16,
+        "x2": 0,
+        "y2": 24,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 96,
+        "x2": 0,
+        "y2": 88,
+        "style": "Normal"
+      },
+      {
+        "x1": -48,
+        "y1": 72,
+        "x2": -40,
+        "y2": 72,
+        "style": "Normal"
+      },
+      {
+        "x1": -48,
+        "y1": 40,
+        "x2": -40,
+        "y2": 40,
+        "style": "Normal"
+      },
+      {
+        "x1": -44,
+        "y1": 76,
+        "x2": -44,
+        "y2": 68,
+        "style": "Normal"
+      },
+      {
+        "x1": 4,
+        "y1": 52,
+        "x2": 0,
+        "y2": 40,
+        "style": "Normal"
+      },
+      {
+        "x1": -4,
+        "y1": 52,
+        "x2": 0,
+        "y2": 40,
+        "style": "Normal"
+      },
+      {
+        "x1": -4,
+        "y1": 52,
+        "x2": 4,
+        "y2": 52,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 52,
+        "x2": 0,
+        "y2": 72,
+        "style": "Normal"
+      }
+    ],
+    "circles": [
+      {
+        "cx": 0,
+        "cy": 56,
+        "r": 32,
+        "style": "Normal"
+      }
+    ],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 0,
+        "y": 96,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "+",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 16,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "-",
+        "spiceOrder": 2
+      },
+      {
+        "x": -48,
+        "y": 80,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "NC+",
+        "spiceOrder": 3
+      },
+      {
+        "x": -48,
+        "y": 32,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "NC-",
+        "spiceOrder": 4
+      }
+    ],
+    "attrs": {
+      "Value": "G",
+      "Prefix": "G",
+      "Description": "Voltage dependent current source"
+    }
+  },
+  "f": {
+    "file": "f.asy",
+    "prefix": "F",
+    "bbox": {
+      "minX": -32,
+      "minY": 0,
+      "maxX": 32,
+      "maxY": 80,
+      "w": 64,
+      "h": 80
+    },
+    "lines": [
+      {
+        "x1": 0,
+        "y1": 56,
+        "x2": 4,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 56,
+        "x2": -4,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": -4,
+        "y1": 44,
+        "x2": 4,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 24,
+        "x2": 0,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 80,
+        "x2": 0,
+        "y2": 72,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 0,
+        "x2": 0,
+        "y2": 8,
+        "style": "Normal"
+      }
+    ],
+    "circles": [
+      {
+        "cx": 0,
+        "cy": 40,
+        "r": 32,
+        "style": "Normal"
+      }
+    ],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 0,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "+",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 80,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "-",
+        "spiceOrder": 2
+      }
+    ],
+    "attrs": {
+      "Value": "F",
+      "Prefix": "F",
+      "Description": "Linear current dependent current source"
+    }
+  },
+  "h": {
+    "file": "h.asy",
+    "prefix": "H",
+    "bbox": {
+      "minX": -32,
+      "minY": 16,
+      "maxX": 32,
+      "maxY": 96,
+      "w": 64,
+      "h": 80
+    },
+    "lines": [
+      {
+        "x1": -8,
+        "y1": 36,
+        "x2": 8,
+        "y2": 36,
+        "style": "Normal"
+      },
+      {
+        "x1": -8,
+        "y1": 76,
+        "x2": 8,
+        "y2": 76,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 28,
+        "x2": 0,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 96,
+        "x2": 0,
+        "y2": 88,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 16,
+        "x2": 0,
+        "y2": 24,
+        "style": "Normal"
+      }
+    ],
+    "circles": [
+      {
+        "cx": 0,
+        "cy": 56,
+        "r": 32,
+        "style": "Normal"
+      }
+    ],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 0,
+        "y": 16,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "+",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 96,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "-",
+        "spiceOrder": 2
+      }
+    ],
+    "attrs": {
+      "Value": "H",
+      "Prefix": "H",
+      "Description": "Linear current dependent voltage source"
+    }
+  },
+  "bi": {
+    "file": "bi.asy",
+    "prefix": "B",
+    "bbox": {
+      "minX": -32,
+      "minY": 0,
+      "maxX": 32,
+      "maxY": 80,
+      "w": 64,
+      "h": 80
+    },
+    "lines": [
+      {
+        "x1": 0,
+        "y1": 56,
+        "x2": 4,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 56,
+        "x2": -4,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": -4,
+        "y1": 44,
+        "x2": 4,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 24,
+        "x2": 0,
+        "y2": 44,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 80,
+        "x2": 0,
+        "y2": 72,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 0,
+        "x2": 0,
+        "y2": 8,
+        "style": "Normal"
+      }
+    ],
+    "circles": [
+      {
+        "cx": 0,
+        "cy": 40,
+        "r": 32,
+        "style": "Normal"
+      }
+    ],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 0,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "+",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 80,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "-",
+        "spiceOrder": 2
+      }
+    ],
+    "attrs": {
+      "Value": "I=F(...)",
+      "Prefix": "B",
+      "Description": "Arbitrary behavioral current source"
+    }
+  },
+  "bi2": {
+    "file": "bi2.asy",
+    "prefix": "B",
+    "bbox": {
+      "minX": -32,
+      "minY": 0,
+      "maxX": 32,
+      "maxY": 80,
+      "w": 64,
+      "h": 80
+    },
+    "lines": [
+      {
+        "x1": 0,
+        "y1": 24,
+        "x2": 4,
+        "y2": 36,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 24,
+        "x2": -4,
+        "y2": 36,
+        "style": "Normal"
+      },
+      {
+        "x1": -4,
+        "y1": 36,
+        "x2": 4,
+        "y2": 36,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 36,
+        "x2": 0,
+        "y2": 56,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 80,
+        "x2": 0,
+        "y2": 72,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 0,
+        "x2": 0,
+        "y2": 8,
+        "style": "Normal"
+      }
+    ],
+    "circles": [
+      {
+        "cx": 0,
+        "cy": 40,
+        "r": 32,
+        "style": "Normal"
+      }
+    ],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 0,
+        "y": 80,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "+",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "-",
+        "spiceOrder": 2
+      }
+    ],
+    "attrs": {
+      "Value": "I=F(...)",
+      "Prefix": "B",
+      "Description": "Arbitrary behavioral current source"
+    }
+  },
+  "sw": {
+    "file": "sw.asy",
+    "prefix": "S",
+    "bbox": {
+      "minX": -48,
+      "minY": 16,
+      "maxX": 32,
+      "maxY": 96,
+      "w": 80,
+      "h": 80
+    },
+    "lines": [
+      {
+        "x1": -48,
+        "y1": 32,
+        "x2": -32,
+        "y2": 32,
+        "style": "Normal"
+      },
+      {
+        "x1": -32,
+        "y1": 32,
+        "x2": -24,
+        "y2": 36,
+        "style": "Normal"
+      },
+      {
+        "x1": -48,
+        "y1": 80,
+        "x2": -32,
+        "y2": 80,
+        "style": "Normal"
+      },
+      {
+        "x1": -32,
+        "y1": 80,
+        "x2": -24,
+        "y2": 76,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 96,
+        "x2": 0,
+        "y2": 72,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 16,
+        "x2": 0,
+        "y2": 36,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 36,
+        "x2": 20,
+        "y2": 60,
+        "style": "Normal"
+      },
+      {
+        "x1": -48,
+        "y1": 72,
+        "x2": -40,
+        "y2": 72,
+        "style": "Normal"
+      },
+      {
+        "x1": -44,
+        "y1": 76,
+        "x2": -44,
+        "y2": 68,
+        "style": "Normal"
+      },
+      {
+        "x1": -48,
+        "y1": 40,
+        "x2": -40,
+        "y2": 40,
+        "style": "Normal"
+      }
+    ],
+    "circles": [
+      {
+        "cx": 0,
+        "cy": 56,
+        "r": 32,
+        "style": "Normal"
+      },
+      {
+        "cx": 0,
+        "cy": 72,
+        "r": 4,
+        "style": "Normal"
+      },
+      {
+        "cx": 20,
+        "cy": 60,
+        "r": 4,
+        "style": "Normal"
+      }
+    ],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 0,
+        "y": 16,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "A",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 96,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "B",
+        "spiceOrder": 2
+      },
+      {
+        "x": -48,
+        "y": 80,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "NC+",
+        "spiceOrder": 3
+      },
+      {
+        "x": -48,
+        "y": 32,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "NC-",
+        "spiceOrder": 4
+      }
+    ],
+    "attrs": {
+      "Value": "SW",
+      "Prefix": "S",
+      "Description": "Voltage controlled switch"
+    }
+  },
+  "csw": {
+    "file": "csw.asy",
+    "prefix": "W",
+    "bbox": {
+      "minX": -32,
+      "minY": 0,
+      "maxX": 32,
+      "maxY": 80,
+      "w": 64,
+      "h": 80
+    },
+    "lines": [
+      {
+        "x1": 0,
+        "y1": 80,
+        "x2": 0,
+        "y2": 56,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 0,
+        "x2": 0,
+        "y2": 20,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 20,
+        "x2": 20,
+        "y2": 44,
+        "style": "Normal"
+      }
+    ],
+    "circles": [
+      {
+        "cx": 0,
+        "cy": 40,
+        "r": 32,
+        "style": "Normal"
+      },
+      {
+        "cx": 0,
+        "cy": 56,
+        "r": 4,
+        "style": "Normal"
+      },
+      {
+        "cx": 20,
+        "cy": 44,
+        "r": 4,
+        "style": "Normal"
+      }
+    ],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": 0,
+        "y": 0,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "+",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 80,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "-",
+        "spiceOrder": 2
+      }
+    ],
+    "attrs": {
+      "Value": "CSW",
+      "Prefix": "W",
+      "Description": "Current controlled switch"
+    }
+  },
+  "tline": {
+    "file": "tline.asy",
+    "prefix": "T",
+    "bbox": {
+      "minX": -48,
+      "minY": -16,
+      "maxX": 48,
+      "maxY": 16,
+      "w": 96,
+      "h": 32
+    },
+    "lines": [
+      {
+        "x1": -48,
+        "y1": 16,
+        "x2": 48,
+        "y2": 16,
+        "style": "Normal"
+      },
+      {
+        "x1": -32,
+        "y1": 8,
+        "x2": 32,
+        "y2": 8,
+        "style": "Normal"
+      },
+      {
+        "x1": -32,
+        "y1": -8,
+        "x2": 32,
+        "y2": -8,
+        "style": "Normal"
+      },
+      {
+        "x1": -48,
+        "y1": -16,
+        "x2": 48,
+        "y2": -16,
+        "style": "Normal"
+      },
+      {
+        "x1": -48,
+        "y1": 16,
+        "x2": -32,
+        "y2": 8,
+        "style": "Normal"
+      },
+      {
+        "x1": -48,
+        "y1": -16,
+        "x2": -32,
+        "y2": -8,
+        "style": "Normal"
+      },
+      {
+        "x1": 48,
+        "y1": 16,
+        "x2": 32,
+        "y2": 8,
+        "style": "Normal"
+      },
+      {
+        "x1": 48,
+        "y1": -16,
+        "x2": 32,
+        "y2": -8,
+        "style": "Normal"
+      }
+    ],
+    "circles": [],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": -48,
+        "y": -16,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "I1",
+        "spiceOrder": 1
+      },
+      {
+        "x": -48,
+        "y": 16,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "R1",
+        "spiceOrder": 2
+      },
+      {
+        "x": 48,
+        "y": -16,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "I2",
+        "spiceOrder": 3
+      },
+      {
+        "x": 48,
+        "y": 16,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "R2",
+        "spiceOrder": 4
+      }
+    ],
+    "attrs": {
+      "Value": "Td=50n Z0=50",
+      "Prefix": "T",
+      "Description": "Ideal Lossless Transmission Line"
+    }
+  },
+  "ltline": {
+    "file": "ltline.asy",
+    "prefix": "T",
+    "bbox": {
+      "minX": -48,
+      "minY": -16,
+      "maxX": 48,
+      "maxY": 16,
+      "w": 96,
+      "h": 32
+    },
+    "lines": [
+      {
+        "x1": -48,
+        "y1": 16,
+        "x2": 48,
+        "y2": 16,
+        "style": "Normal"
+      },
+      {
+        "x1": -36,
+        "y1": 12,
+        "x2": 36,
+        "y2": 12,
+        "style": "Normal"
+      },
+      {
+        "x1": -36,
+        "y1": -12,
+        "x2": 36,
+        "y2": -12,
+        "style": "Normal"
+      },
+      {
+        "x1": -48,
+        "y1": -16,
+        "x2": 48,
+        "y2": -16,
+        "style": "Normal"
+      },
+      {
+        "x1": -48,
+        "y1": 16,
+        "x2": -36,
+        "y2": 12,
+        "style": "Normal"
+      },
+      {
+        "x1": -48,
+        "y1": -16,
+        "x2": -36,
+        "y2": -12,
+        "style": "Normal"
+      },
+      {
+        "x1": 48,
+        "y1": 16,
+        "x2": 36,
+        "y2": 12,
+        "style": "Normal"
+      },
+      {
+        "x1": 48,
+        "y1": -16,
+        "x2": 36,
+        "y2": -12,
+        "style": "Normal"
+      },
+      {
+        "x1": -40,
+        "y1": 0,
+        "x2": -32,
+        "y2": 0,
+        "style": "Normal"
+      },
+      {
+        "x1": -32,
+        "y1": 0,
+        "x2": -24,
+        "y2": 8,
+        "style": "Normal"
+      },
+      {
+        "x1": -24,
+        "y1": 8,
+        "x2": -8,
+        "y2": -8,
+        "style": "Normal"
+      },
+      {
+        "x1": -8,
+        "y1": -8,
+        "x2": 8,
+        "y2": 8,
+        "style": "Normal"
+      },
+      {
+        "x1": 8,
+        "y1": 8,
+        "x2": 24,
+        "y2": -8,
+        "style": "Normal"
+      },
+      {
+        "x1": 24,
+        "y1": -8,
+        "x2": 32,
+        "y2": 0,
+        "style": "Normal"
+      },
+      {
+        "x1": 32,
+        "y1": 0,
+        "x2": 40,
+        "y2": 0,
+        "style": "Normal"
+      }
+    ],
+    "circles": [],
+    "arcs": [],
+    "rects": [],
+    "pins": [
+      {
+        "x": -48,
+        "y": -16,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "I1",
+        "spiceOrder": 1
+      },
+      {
+        "x": -48,
+        "y": 16,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "R1",
+        "spiceOrder": 2
+      },
+      {
+        "x": 48,
+        "y": -16,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "I2",
+        "spiceOrder": 3
+      },
+      {
+        "x": 48,
+        "y": 16,
+        "rotation": "NONE",
+        "length": 0,
+        "name": "R2",
+        "spiceOrder": 4
+      }
+    ],
+    "attrs": {
+      "Value": "LTRA",
+      "Prefix": "O",
+      "Description": "Lossy Transmission Line. Note: You must supply the .model for this device"
+    }
+  },
+  "ferritebead": {
+    "file": "FerriteBead.asy",
+    "prefix": "L",
+    "bbox": {
+      "minX": -16,
+      "minY": -32,
+      "maxX": 16,
+      "maxY": 32,
+      "w": 32,
+      "h": 64
+    },
+    "lines": [
+      {
+        "x1": -16,
+        "y1": 8,
+        "x2": -16,
+        "y2": -8,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": -8,
+        "x2": 0,
+        "y2": -32,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 12,
+        "x2": 0,
+        "y2": 32,
+        "style": "Normal"
+      },
+      {
+        "x1": 16,
+        "y1": 8,
+        "x2": 16,
+        "y2": -8,
+        "style": "Normal"
+      }
+    ],
+    "circles": [
+      {
+        "cx": 0,
+        "cy": -8,
+        "r": 16,
+        "style": "Normal"
+      },
+      {
+        "cx": 0,
+        "cy": -8,
+        "r": 7,
+        "style": "Normal"
+      }
+    ],
+    "arcs": [
+      {
+        "x1": 16,
+        "y1": 4,
+        "x2": -16,
+        "y2": 12,
+        "x3": -16,
+        "y3": 8,
+        "x4": 16,
+        "y4": 8,
+        "style": "Normal"
+      }
+    ],
+    "rects": [],
+    "pins": [
+      {
+        "x": 0,
+        "y": -32,
+        "rotation": "NONE",
+        "length": 8,
+        "name": "A",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 32,
+        "rotation": "NONE",
+        "length": 8,
+        "name": "B",
+        "spiceOrder": 2
+      }
+    ],
+    "attrs": {
+      "Prefix": "L_Ferrite_Bead",
+      "Description": "A Ferrite Bead"
+    }
+  },
+  "ferritebead2": {
+    "file": "FerriteBead2.asy",
+    "prefix": "L",
+    "bbox": {
+      "minX": -9,
+      "minY": -32,
+      "maxX": 9,
+      "maxY": 32,
+      "w": 18,
+      "h": 64
+    },
+    "lines": [
+      {
+        "x1": 0,
+        "y1": -9,
+        "x2": 0,
+        "y2": -32,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 9,
+        "x2": 0,
+        "y2": 32,
+        "style": "Normal"
+      },
+      {
+        "x1": -9,
+        "y1": 8,
+        "x2": 9,
+        "y2": 8,
+        "style": "Normal"
+      },
+      {
+        "x1": -9,
+        "y1": 7,
+        "x2": 9,
+        "y2": 7,
+        "style": "Normal"
+      },
+      {
+        "x1": -9,
+        "y1": 6,
+        "x2": 9,
+        "y2": 6,
+        "style": "Normal"
+      },
+      {
+        "x1": -9,
+        "y1": 6,
+        "x2": 9,
+        "y2": 6,
+        "style": "Normal"
+      },
+      {
+        "x1": -9,
+        "y1": 5,
+        "x2": 9,
+        "y2": 5,
+        "style": "Normal"
+      },
+      {
+        "x1": -9,
+        "y1": 4,
+        "x2": 9,
+        "y2": 4,
+        "style": "Normal"
+      },
+      {
+        "x1": -9,
+        "y1": 3,
+        "x2": 9,
+        "y2": 3,
+        "style": "Normal"
+      },
+      {
+        "x1": -9,
+        "y1": 3,
+        "x2": 9,
+        "y2": 3,
+        "style": "Normal"
+      },
+      {
+        "x1": -9,
+        "y1": 2,
+        "x2": 9,
+        "y2": 2,
+        "style": "Normal"
+      },
+      {
+        "x1": -9,
+        "y1": 1,
+        "x2": 9,
+        "y2": 1,
+        "style": "Normal"
+      },
+      {
+        "x1": -9,
+        "y1": 0,
+        "x2": 9,
+        "y2": 0,
+        "style": "Normal"
+      },
+      {
+        "x1": -9,
+        "y1": 0,
+        "x2": 9,
+        "y2": 0,
+        "style": "Normal"
+      },
+      {
+        "x1": -9,
+        "y1": -1,
+        "x2": 9,
+        "y2": -1,
+        "style": "Normal"
+      },
+      {
+        "x1": -9,
+        "y1": -4,
+        "x2": 9,
+        "y2": -4,
+        "style": "Normal"
+      },
+      {
+        "x1": -9,
+        "y1": -5,
+        "x2": 9,
+        "y2": -5,
+        "style": "Normal"
+      },
+      {
+        "x1": -9,
+        "y1": -6,
+        "x2": 9,
+        "y2": -6,
+        "style": "Normal"
+      },
+      {
+        "x1": -9,
+        "y1": -6,
+        "x2": 9,
+        "y2": -6,
+        "style": "Normal"
+      },
+      {
+        "x1": -9,
+        "y1": -7,
+        "x2": 9,
+        "y2": -7,
+        "style": "Normal"
+      },
+      {
+        "x1": -9,
+        "y1": -8,
+        "x2": 9,
+        "y2": -8,
+        "style": "Normal"
+      },
+      {
+        "x1": -9,
+        "y1": -3,
+        "x2": 9,
+        "y2": -3,
+        "style": "Normal"
+      },
+      {
+        "x1": -9,
+        "y1": -2,
+        "x2": 9,
+        "y2": -2,
+        "style": "Normal"
+      },
+      {
+        "x1": 7,
+        "y1": 9,
+        "x2": 7,
+        "y2": -9,
+        "style": "Normal"
+      },
+      {
+        "x1": 8,
+        "y1": 9,
+        "x2": 8,
+        "y2": -9,
+        "style": "Normal"
+      },
+      {
+        "x1": 5,
+        "y1": 9,
+        "x2": 5,
+        "y2": -9,
+        "style": "Normal"
+      },
+      {
+        "x1": 6,
+        "y1": 9,
+        "x2": 6,
+        "y2": -9,
+        "style": "Normal"
+      },
+      {
+        "x1": 3,
+        "y1": 9,
+        "x2": 3,
+        "y2": -9,
+        "style": "Normal"
+      },
+      {
+        "x1": 4,
+        "y1": 9,
+        "x2": 4,
+        "y2": -9,
+        "style": "Normal"
+      },
+      {
+        "x1": 1,
+        "y1": 9,
+        "x2": 1,
+        "y2": -9,
+        "style": "Normal"
+      },
+      {
+        "x1": 2,
+        "y1": 9,
+        "x2": 2,
+        "y2": -9,
+        "style": "Normal"
+      },
+      {
+        "x1": -1,
+        "y1": 9,
+        "x2": -1,
+        "y2": -9,
+        "style": "Normal"
+      },
+      {
+        "x1": 0,
+        "y1": 9,
+        "x2": 0,
+        "y2": -9,
+        "style": "Normal"
+      },
+      {
+        "x1": -3,
+        "y1": 9,
+        "x2": -3,
+        "y2": -9,
+        "style": "Normal"
+      },
+      {
+        "x1": -2,
+        "y1": 9,
+        "x2": -2,
+        "y2": -9,
+        "style": "Normal"
+      },
+      {
+        "x1": -5,
+        "y1": 9,
+        "x2": -5,
+        "y2": -9,
+        "style": "Normal"
+      },
+      {
+        "x1": -4,
+        "y1": 9,
+        "x2": -4,
+        "y2": -9,
+        "style": "Normal"
+      },
+      {
+        "x1": -7,
+        "y1": 9,
+        "x2": -7,
+        "y2": -9,
+        "style": "Normal"
+      },
+      {
+        "x1": -6,
+        "y1": 9,
+        "x2": -6,
+        "y2": -9,
+        "style": "Normal"
+      },
+      {
+        "x1": -8,
+        "y1": 9,
+        "x2": -8,
+        "y2": -9,
+        "style": "Normal"
+      }
+    ],
+    "circles": [],
+    "arcs": [],
+    "rects": [
+      {
+        "x1": -9,
+        "y1": -9,
+        "x2": 9,
+        "y2": 9,
+        "style": "Normal"
+      }
+    ],
+    "pins": [
+      {
+        "x": 0,
+        "y": -32,
+        "rotation": "NONE",
+        "length": 8,
+        "name": "A",
+        "spiceOrder": 1
+      },
+      {
+        "x": 0,
+        "y": 32,
+        "rotation": "NONE",
+        "length": 8,
+        "name": "B",
+        "spiceOrder": 2
+      }
+    ],
+    "attrs": {
+      "Prefix": "L_Ferrite_Bead",
+      "Description": "A Ferrite Bead(Alternate symbol)"
+    }
+  }
+}
