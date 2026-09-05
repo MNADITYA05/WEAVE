@@ -12,6 +12,7 @@
  */
 
 import { _detectTopologies, _applyTopologyHints } from '../shared/topology.js';
+import { resolveStdlib, stdlibReady } from './lib-resolver.js';
 import { parseNetlist } from './netlist-parser.js';
 import { classifyNets } from './classifier.js';
 import { netDepths, decorateComponents } from './orientation.js';
@@ -50,9 +51,16 @@ export interface ConvertOpts {
 
 // ─── convert ─────────────────────────────────────────────────────────────────
 
-export async function convert(text: string, opts: ConvertOpts = {}): Promise<string> {
+export async function convert(
+  text: string,
+  opts: ConvertOpts = {},
+): Promise<{ asc: string; missingLibs: string[] }> {
+  // ── Stage 0: stdlib resolution (Situation 2) ───────────────────────────────
+  await stdlibReady;
+  const { text: enrichedText, missingLibs } = resolveStdlib(text);
+
   // ── Stage 1: parse & classify ──────────────────────────────────────────────
-  const { comps: rawComps, directives } = parseNetlist(text);
+  const { comps: rawComps, directives } = parseNetlist(enrichedText);
   const cls   = classifyNets(rawComps);
   const depth = netDepths(rawComps, cls);
 
@@ -122,5 +130,5 @@ export async function convert(text: string, opts: ConvertOpts = {}): Promise<str
   let asc = emitAsc(annotated as never, wires as never, flags as never, directives);
   asc = mergeWires(asc);
   asc = detectJunctions(asc);
-  return asc;
+  return { asc, missingLibs };
 }

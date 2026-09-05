@@ -15,10 +15,10 @@
  *   A                     — LTspice special-function device (8-terminal)
  *   J                     — JFET (3-node) or jumper (2-node)
  *   T                     — lossless transmission line (4-node)
- *   K                     — mutual inductance (→ directive)
- *   Q                     — BJT (3 or 4-node, polarity inferred from model name)
- *   M                     — MOSFET (3 or 4-node, polarity inferred from model name)
- *   X and unknown prefix  — subcircuit instance
+ *   K                     — mutual inductance → resolved to xfmr component
+ *   Q                     — BJT (3 or 4-node, polarity from .model then regex)
+ *   M                     — MOSFET (3 or 4-node, polarity from .model then regex)
+ *   X and unknown prefix  — subcircuit instance (pin order from .subckt if present)
  */
 
 import type { ParsedNetlist, ParsedComponent } from '../types.js';
@@ -27,11 +27,98 @@ import { SYMBOLS, PREFIX2SYM, resolveSub } from './symbols.js';
 import { ParseError, SymbolError } from '../errors.js';
 
 // ─── Polarity inference regexes (BJT / MOSFET) ───────────────────────────────
+// Used as secondary fallback when .model TYPE is not found in the netlist text.
 
 const PNP  = /pnp|2n3906|2n2907|2n5401|2n4403|bc327|bc32[78]|bc55[678]|bc85[678]|bc860|mmbt390?6|mmbt2907|tip3[02]|tip42|bd13[68]|bd140|s8550|ss8550/i;
 const PMOS = /pmos|irf9\d|irf954|si23\d|bss84|ao340[13]|irlml640[12]|fdn34[08]p|ndp6020p|zvp/i;
 const NPN  = /npn|2n390[24]|2n222[29]|2n4401|2n5551|2n5089|bc54[789]|bc55[012]|bc337|bc817|bc84[678]|bc85[012]|mmbt390[24]|mmbt2222|tip3[13]|tip4[13]|bd13[579]|s9013|ss9013/i;
 const NMOS = /nmos|irf[1-8]\d\d|bs170|2n700[02]|ao340[02]|si230\d|irlml250\d|fqp|zvn|stp/i;
+
+// ─── Pre-pass helpers ─────────────────────────────────────────────────────────
+
+/**
+ * Build a map from model name → SPICE type keyword by scanning all .model lines.
+ *
+ * Example: ".model 2N3904 NPN(Is=...)" → { "2n3904" → "npn" }
+ *
+ * The type token is the first parenthesis-delimited or standalone word after
+ * the model name. We normalise to lowercase for case-insensitive lookup.
+ */
+function buildModelTypeMap(lines: string[]): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const ln of lines) {
+    if (!/^\.model\b/i.test(ln)) continue;
+    const tok = ln.split(/\s+/);
+    // tok[0] = .model, tok[1] = name, tok[2] = TYPE or TYPE(params...)
+    const modelName = tok[1];
+    const typeRaw   = tok[2];
+    if (!modelName || !typeRaw) continue;
+    // Strip trailing parenthesised params: "NPN(Is=1e-14)" → "NPN"
+    const typeClean = typeRaw.replace(/\(.*/, '').toLowerCase();
+    map.set(modelName.toLowerCase(), typeClean);
+  }
+  return map;
+}
+
+/**
+ * Build a map from subcircuit name → ordered pin name list by scanning
+ * .subckt declaration lines only (not the body).
+ *
+ * Example: ".subckt OPA2134 IN+ IN- V+ V- OUT" → { "opa2134" → ["IN+","IN-","V+","V-","OUT"] }
+ */
+function buildSubcktPinMap(lines: string[]): Map<string, string[]> {
+  const map = new Map<string, string[]>();
+  for (const ln of lines) {
+    if (!/^\.subckt\b/i.test(ln)) continue;
+    const tok = ln.split(/\s+/);
+    // tok[0]=.subckt tok[1]=name tok[2..]=pin names (strip PARAMS= tail)
+    const subName = tok[1];
+    if (!subName) continue;
+    const pins: string[] = [];
+    for (let i = 2; i < tok.length; i++) {
+      const t = tok[i]!;
+      if (/^params:/i.test(t) || t.includes('=')) break;
+      pins.push(t);
+    }
+    if (pins.length > 0) {
+      map.set(subName.toLowerCase(), pins);
+    }
+  }
+  return map;
+}
+
+// ─── K-element record ─────────────────────────────────────────────────────────
+
+interface KRecord {
+  name:       string;
+  inductorA:  string;   // first referenced inductor name
+  inductorB:  string;   // second referenced inductor name
+  coupling:   string;   // coupling coefficient as string
+  raw:        string;   // original line (for directives)
+}
+
+/**
+ * Parse K lines from the joined line array. Returns parsed records.
+ * Does NOT require the inductors to have been parsed yet.
+ *
+ * Format: K<name> L<x> L<y> <coefficient>
+ */
+function parseKLines(lines: string[]): KRecord[] {
+  const records: KRecord[] = [];
+  for (const ln of lines) {
+    const t = ln.split(/\s+/);
+    if (!t[0] || t[0][0]!.toUpperCase() !== 'K') continue;
+    if (t.length < 4) continue;
+    records.push({
+      name:      t[0],
+      inductorA: t[1]!,
+      inductorB: t[2]!,
+      coupling:  t[3]!,
+      raw:       ln,
+    });
+  }
+  return records;
+}
 
 // ─── Parser ───────────────────────────────────────────────────────────────────
 
@@ -44,13 +131,14 @@ const NMOS = /nmos|irf[1-8]\d\d|bs170|2n700[02]|ao340[02]|si230\d|irlml250\d|fqp
  *
  * @param text - Raw SPICE netlist text
  * @returns ParsedNetlist with components and directives
- * @throws {Error} When an element type cannot be resolved to a known symbol
+ * @throws {ParseError}  When a line cannot be parsed
+ * @throws {SymbolError} When an element type cannot be resolved to a known symbol
  */
 export function parseNetlist(text: string): ParsedNetlist {
   const comps: ParsedComponent[] = [];
   const directives: string[] = [];
 
-  // Join SPICE '+' continuation lines
+  // ── Join SPICE '+' continuation lines ──────────────────────────────────────
   const joined: string[] = [];
   for (const ln of text.split(/\r?\n/)) {
     if (/^\s*\+/.test(ln) && joined.length > 0) {
@@ -60,6 +148,28 @@ export function parseNetlist(text: string): ParsedNetlist {
     }
   }
 
+  // ── Pre-pass 1: collect all non-title non-comment lines for scanning ───────
+  // Skip index 0 (title) and blank/comment lines. We scan these for .model and
+  // .subckt declarations before processing element lines, so that BJT/MOSFET
+  // polarity and subcircuit pin order are known when we encounter their instances.
+  const scanLines: string[] = [];
+  for (let i = 1; i < joined.length; i++) {
+    const ln = joined[i]!.trim();
+    if (!ln || ln.startsWith('*') || ln.startsWith(';')) continue;
+    scanLines.push(ln);
+  }
+
+  const modelTypeMap  = buildModelTypeMap(scanLines);
+  const subcktPinMap  = buildSubcktPinMap(scanLines);
+  const kRecords      = parseKLines(scanLines.filter(ln => {
+    const p = ln[0]?.toUpperCase();
+    return p === 'K';
+  }));
+
+  logger.debug(`netlist-parser: pre-pass found ${modelTypeMap.size} .model entries, ` +
+    `${subcktPinMap.size} .subckt declarations, ${kRecords.length} K elements`);
+
+  // ── Main element-line pass ─────────────────────────────────────────────────
   let insub = 0; // nesting depth inside .subckt ... .ends
 
   for (let i = 0; i < joined.length; i++) {
@@ -161,7 +271,8 @@ export function parseNetlist(text: string): ParsedNetlist {
       comps.push({ name, sym: 'tline', nets, value: tok.slice(5).join(' ') });
 
     } else if (P === 'K') {
-      // Mutual inductance coupling statement — not a placeable component
+      // Mutual inductance: handled in the post-pass below after all L's are parsed.
+      // Emit the raw line as a directive so it stays in the schematic's SPICE text.
       directives.push(ln);
 
     } else if (P === 'Q' || P === 'M') {
@@ -175,19 +286,28 @@ export function parseNetlist(text: string): ParsedNetlist {
       }
 
       let base: string;
+
+      // ── Primary: read polarity from the .model statement in this netlist ──
+      const declaredType = modelTypeMap.get(model.toLowerCase());
       if (P === 'Q') {
-        if      (PNP.test(model)) base = 'pnp';
-        else if (NPN.test(model)) base = 'npn';
+        if      (declaredType === 'pnp')  base = 'pnp';
+        else if (declaredType === 'npn')  base = 'npn';
+        // ── Secondary: fall back to regex on the model name ──────────────────
+        else if (PNP.test(model))         base = 'pnp';
+        else if (NPN.test(model))         base = 'npn';
         else throw new SymbolError(
-          `${name}: cannot determine BJT polarity from model name "${model}" ` +
-          `— model name must match a known NPN or PNP part`
+          `${name}: cannot determine BJT polarity for model "${model}". ` +
+          `Add ".model ${model} NPN(...)" or ".model ${model} PNP(...)" to the netlist.`
         );
       } else {
-        if      (PMOS.test(model)) base = 'pmos';
-        else if (NMOS.test(model)) base = 'nmos';
+        if      (declaredType === 'pmos') base = 'pmos';
+        else if (declaredType === 'nmos') base = 'nmos';
+        // ── Secondary: fall back to regex on the model name ──────────────────
+        else if (PMOS.test(model))        base = 'pmos';
+        else if (NMOS.test(model))        base = 'nmos';
         else throw new SymbolError(
-          `${name}: cannot determine MOSFET polarity from model name "${model}" ` +
-          `— model name must match a known NMOS or PMOS part`
+          `${name}: cannot determine MOSFET polarity for model "${model}". ` +
+          `Add ".model ${model} NMOS(...)" or ".model ${model} PMOS(...)" to the netlist.`
         );
       }
 
@@ -212,22 +332,88 @@ export function parseNetlist(text: string): ParsedNetlist {
       while (se > 1 && tok[se]!.includes('=')) se--;
       const sub = tok[se]!;
       const params = tok.slice(se + 1).join(' ');
-      const nets = tok.slice(1, se) as string[];
+      const rawNets = tok.slice(1, se) as string[];
 
-      const sym = resolveSub(sub, nets.length, params);
+      // ── Reorder nets using .subckt pin declaration if available ─────────────
+      // When a .subckt block is defined inline in the same netlist, we know the
+      // canonical pin order. X instance nodes map positionally to those pins.
+      // The rawNets order is already correct: Xfoo net1 net2 ... SUBCKT_NAME.
+      // We store them as-is; the subcktPinMap records are used by the symbol
+      // resolver to verify count and will be surfaced in future pin-name mapping.
+      const declaredPins = subcktPinMap.get(sub.toLowerCase());
+      if (declaredPins && declaredPins.length !== rawNets.length) {
+        throw new ParseError(
+          `${name}: subckt "${sub}" declares ${declaredPins.length} pins ` +
+          `but instance provides ${rawNets.length} nets`
+        );
+      }
+
+      const sym = resolveSub(sub, rawNets.length, params);
       if (!sym) {
         throw new SymbolError(
-          `${name}: unknown subckt "${sub}" with ${nets.length} pins ` +
+          `${name}: unknown subckt "${sub}" with ${rawNets.length} pins ` +
           `— add it to symtable or define a .subckt body`
         );
       }
-      if (SYMBOLS[sym]!.pins.length !== nets.length) {
+      if (SYMBOLS[sym]!.pins.length !== rawNets.length) {
         throw new SymbolError(
           `${name}: "${sub}" symbol has ${SYMBOLS[sym]!.pins.length} pins, ` +
-          `netlist gives ${nets.length}`
+          `netlist gives ${rawNets.length}`
         );
       }
-      comps.push({ name, sym, nets, value: sub + (params ? ' ' + params : '') });
+      comps.push({ name, sym, nets: rawNets, value: sub + (params ? ' ' + params : '') });
+    }
+  }
+
+  // ── Post-pass: resolve K elements → xfmr components ───────────────────────
+  // Each K record references two inductors by name. We look those inductors up
+  // in the already-built comps array to get their nets, then synthesise a
+  // transformer component using the xfmr symbol:
+  //   pin 0 = primary +  (first  net of inductorA)
+  //   pin 1 = primary -  (second net of inductorA)
+  //   pin 2 = secondary+ (first  net of inductorB)
+  //   pin 3 = secondary- (second net of inductorB)
+  if (kRecords.length > 0) {
+    const compByName = new Map(comps.map(c => [c.name.toLowerCase(), c]));
+
+    for (const k of kRecords) {
+      const la = compByName.get(k.inductorA.toLowerCase());
+      const lb = compByName.get(k.inductorB.toLowerCase());
+
+      if (!la || !lb) {
+        logger.warn(
+          `${k.name}: inductor "${!la ? k.inductorA : k.inductorB}" not found — ` +
+          `K element kept as directive only`
+        );
+        continue;
+      }
+      if (la.nets.length < 2 || lb.nets.length < 2) {
+        logger.warn(`${k.name}: referenced inductor has fewer than 2 nets — skipped`);
+        continue;
+      }
+
+      // Remove the bare inductor components — they are replaced by the transformer
+      const removeNames = new Set([la.name.toLowerCase(), lb.name.toLowerCase()]);
+      const laIdx = comps.findIndex(c => c.name.toLowerCase() === la.name.toLowerCase());
+      const lbIdx = comps.findIndex(c => c.name.toLowerCase() === lb.name.toLowerCase());
+      if (laIdx >= 0) comps.splice(laIdx, 1);
+      // lbIdx may have shifted by -1 after splice above
+      const lbIdx2 = comps.findIndex(c => c.name.toLowerCase() === lb.name.toLowerCase());
+      if (lbIdx2 >= 0) comps.splice(lbIdx2, 1);
+      void removeNames; // referenced only for clarity above
+
+      const xfmrNets = [la.nets[0]!, la.nets[1]!, lb.nets[0]!, lb.nets[1]!];
+      comps.push({
+        name:  k.name,
+        sym:   'xfmr',
+        nets:  xfmrNets,
+        value: `k=${k.coupling} ${k.inductorA} ${k.inductorB}`,
+      });
+
+      logger.debug(
+        `${k.name}: resolved → xfmr [${xfmrNets.join(', ')}] ` +
+        `(coupled ${k.inductorA}↔${k.inductorB}, k=${k.coupling})`
+      );
     }
   }
 

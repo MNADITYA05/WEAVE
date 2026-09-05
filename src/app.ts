@@ -9,6 +9,7 @@
  */
 
 import { convert } from './tab1/convert.js';
+import { injectUserLibs } from './tab1/lib-resolver.js';
 import { compare }                   from './tab1/verifier.js';
 import { parseNetlist }              from './tab1/netlist-parser.js';
 import { setAscView, renderSchematic } from './tab1/renderer.js';
@@ -154,13 +155,23 @@ async function run(): Promise<void> {
   const info   = document.getElementById('info')    as HTMLElement;
   if (!src) return;
   try {
-    lastAsc = await convert(src);
+    const result = await convert(src);
+    lastAsc = result.asc;
+    const missingLibs = result.missingLibs;
+    const libBar2 = document.getElementById('missing-libs-bar') as HTMLElement;
+    const libMsg2 = document.getElementById('missing-libs-msg') as HTMLElement;
+    if (missingLibs.length) {
+      libMsg2.textContent = `Missing .lib definitions for: ${missingLibs.join(', ')} — upload the .lib / .sub files to resolve`;
+      libBar2.style.display = 'flex';
+      clog(`⚠ Missing .lib definitions for: ${missingLibs.join(', ')}`, 'warn');
+    } else {
+      libBar2.style.display = 'none';
+      libMsg2.textContent = '';
+    }
     const errs  = compare(src, lastAsc);
     const nSym  = (lastAsc.match(/^SYMBOL /gm)  ?? []).length;
     const nWire = (lastAsc.match(/^WIRE /gm)    ?? []).length;
     info.textContent = `${nSym} symbols, ${nWire} wires`;
-    lastAsc = mergeWires(lastAsc);
-    lastAsc = detectJunctions(lastAsc);
     (document.getElementById('ascview') as HTMLElement).textContent = lastAsc;
     renderSchematic(lastAsc);
     if (errs.length) {
@@ -283,6 +294,25 @@ window.addEventListener('DOMContentLoaded', () => {
 
   goBtn.onclick = () => void run();
   dlBtn.onclick = download;
+
+  // ── Missing-libs upload handler ────────────────────────────────────────────
+  const libBar    = document.getElementById('missing-libs-bar') as HTMLElement;
+  const libMsg    = document.getElementById('missing-libs-msg') as HTMLElement;
+  const libUpload = document.getElementById('lib-upload')       as HTMLInputElement;
+
+  libUpload.addEventListener('change', () => {
+    const files = Array.from(libUpload.files ?? []);
+    if (!files.length) return;
+    const nlEl = document.getElementById('nl') as HTMLTextAreaElement;
+    Promise.all(files.map(f => f.text())).then(texts => {
+      const enriched = injectUserLibs(nlEl.value.trim(), texts);
+      nlEl.value = enriched;
+      libBar.style.display = 'none';
+      libMsg.textContent = '';
+      libUpload.value = '';
+      void run();
+    }).catch(err => clog('lib upload error: ' + String(err), 'err'));
+  });
 
   let t1: ReturnType<typeof setTimeout>;
   (document.getElementById('nl') as HTMLTextAreaElement).addEventListener('input', () => {

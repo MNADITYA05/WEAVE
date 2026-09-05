@@ -28,6 +28,13 @@
     <span id="info"></span>
     <span id="nsym"></span>
   </div>
+  <div id="missing-libs-bar" style="display:none;padding:6px 12px;background:#2a1f00;border-bottom:1px solid #664;color:#ffcc44;font-size:13px;align-items:center;gap:12px">
+    <span id="missing-libs-msg"></span>
+    <label style="cursor:pointer;padding:3px 10px;background:#554400;border:1px solid #887733;border-radius:3px;font-size:12px">
+      Upload .lib / .sub files
+      <input type="file" id="lib-upload" accept=".lib,.sub" multiple style="display:none">
+    </label>
+  </div>
   <div id="workspace">
     <div id="toprow">
       <div class="pane" id="leftpane"><div class="label">netlist (input)</div><textarea id="nl" spellcheck="false"></textarea></div>
