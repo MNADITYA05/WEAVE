@@ -47,9 +47,9 @@ SPICE netlists are text — powerful, but completely opaque to anyone who isn't 
 
 **Weave v5** is a browser-based EDA suite with a real simulation backend — covering the complete schematic ↔ netlist ↔ waveform loop in three integrated tabs.
 
-1. **Tab 1 — Netlist → Schematic** — Paste any SPICE netlist; Weave parses it, classifies topology, runs an ELK.js auto-layout, and renders a downloadable LTspice `.asc` schematic.
+1. **Tab 1 — Netlist → Schematic** — Paste any SPICE netlist; Weave resolves standard library references automatically, parses the netlist, classifies topology, runs an ELK.js auto-layout, and renders a downloadable LTspice `.asc` schematic. Missing `.lib` files are surfaced with an upload prompt.
 2. **Tab 2 — Schematic Editor** — Interactive SVG canvas: place components from a searchable palette, draw wires, add net labels and SPICE directives, rotate/mirror, undo/redo, run ERC, and export SPICE netlist, `.asc`, SVG, or PNG. Sends the netlist directly to Tab 3.
-3. **Tab 3 — SPICE Simulator** — Paste or receive a netlist, configure transient/AC/DC sweep parameters, run it against a FastAPI + ngspice backend, and view live multi-trace waveforms with zoom, pan, and probe toggle.
+3. **Tab 3 — SPICE Simulator** — Paste or receive a netlist, configure transient / AC / DC / operating point / noise / transfer function / parameter sweep simulations, run it against a FastAPI + ngspice backend, and view live multi-trace waveforms with zoom, pan, and probe toggle.
 
 ---
 
@@ -95,6 +95,7 @@ SPICE netlists are text — powerful, but completely opaque to anyone who isn't 
 | Technology | Purpose |
 |---|---|
 | Custom SPICE parser (`netlist-parser.ts`) | Tokenises and models SPICE netlist elements |
+| Standard library resolver (`lib-resolver.ts`) | Injects `.model`/`.subckt` definitions from `stdlib_db.json` for standard LTspice parts |
 | Union-Find (DSU) (`shared/union-find.ts`) | Wire connectivity → net name assignment in Tab 2 |
 | Custom `.asc` emitter (`flag-emit.ts`, `renderer.ts`) | Produces valid LTspice schematic files |
 | Typed error hierarchy | `WeaveError` → `ParseError \| SymbolError \| LayoutError \| RoutingError` |
@@ -108,15 +109,19 @@ SPICE netlists are text — powerful, but completely opaque to anyone who isn't 
 
 ```mermaid
 flowchart TD
-    A([User pastes SPICE netlist]) --> B[netlist-parser.ts\nTokenise & build component graph]
-    B --> C[classifier.ts\nDetect topology & component roles]
-    C --> D[router.ts + layout.ts\nRun ELK.js auto-layout]
-    D --> E[renderer.ts\nEmit LTspice .asc symbol blocks]
-    E --> F[flag-emit.ts\nAdd net labels & GND flags]
-    F --> G([.asc file ready for download\nor SVG preview in browser])
+    A([User pastes SPICE netlist]) --> B[lib-resolver.ts\nResolve stdlib references\nInject missing .model/.subckt]
+    B --> B2{Missing libs?}
+    B2 -- Yes --> B3[Show yellow bar\nPrompt .lib upload]
+    B2 -- No --> C
+    B3 --> C[netlist-parser.ts\nTokenise & build component graph]
+    C --> D[classifier.ts + orientation.ts\nDetect topology & assign depth/rotation]
+    D --> E[layout.ts\nBuild ELK graph + run auto-layout]
+    E --> F[router.ts + apply-layout.ts\nApply positions, route wires]
+    F --> G[renderer.ts\nEmit LTspice .asc symbol blocks]
+    G --> H([.asc file ready for download\nor SVG preview in browser])
 
     style A fill:#4F46E5,color:#fff,stroke:none
-    style G fill:#059669,color:#fff,stroke:none
+    style H fill:#059669,color:#fff,stroke:none
 ```
 
 ### Tab 2 — Schematic Editor → Netlist
@@ -162,9 +167,14 @@ weave/
 ├── package.json                      # npm scripts and dependency manifest
 ├── Dockerfile                        # Backend container image (Python + ngspice)
 ├── docker-compose.yml                # Orchestrates backend (port 8000) + frontend (port 5173)
+├── build_stdlib.py                   # Dev tool: rebuilds data/stdlib_db.json from LTspice lib files
 │
 ├── css/
 │   └── style.css                     # Global dark-theme styles
+│
+├── data/                             # Static data files served by Vite
+│   ├── stdlib_db.json                # Pre-parsed LTspice standard library (slim — pin names only, ~370 KB)
+│   └── stdlib_db_full.json           # Full library with subckt body text (~6.5 MB, for backend/simulator use)
 │
 ├── lib/                              # Third-party libraries (elkjs bundle)
 │
@@ -172,8 +182,10 @@ weave/
 │   ├── main.py                       # FastAPI app; /ping, /simulate, /validate endpoints
 │   ├── runner.py                     # ngspice subprocess orchestrator; writes .cir, reads .raw
 │   ├── raw_parser.py                 # ASCII .raw file parser → SimVector / SimResult dataclasses
-│   ├── netlist.py                    # Netlist pre-processing: _ensure_control, _inject_save_raw
+│   ├── netlist.py                    # Netlist pre-processing: _ensure_control, _inject_save_raw, _resolve_spicelib
 │   ├── requirements.txt              # Python dependencies (fastapi, uvicorn, numpy)
+│   ├── spicelib/                     # Bundled SPICE model files copied into Docker at /spicelib
+│   │   └── standard.lib              # Standard model definitions available to ngspice at runtime
 │   └── __init__.py
 │
 └── src/                              # All frontend source — TypeScript ES modules
@@ -191,7 +203,8 @@ weave/
     │
     ├── tab1/                         # Netlist → Schematic pipeline (Tab 1)
     │   ├── types.ts                  # Tab 1 types: ParsedComponent, PlacedComponent, ElkGraph, TopologyType, …
-    │   ├── convert.ts                # Top-level Tab 1 orchestrator
+    │   ├── convert.ts                # Top-level Tab 1 orchestrator (14-stage pipeline)
+    │   ├── lib-resolver.ts           # Stage 0: stdlib resolution — injects .model/.subckt from stdlib_db.json
     │   ├── netlist-parser.ts         # SPICE tokeniser and AST builder
     │   ├── classifier.ts             # Topology classification (series/parallel/bridge/feedback)
     │   ├── layout.ts                 # ELK.js layout wrapper
@@ -236,8 +249,8 @@ weave/
     │       └── power.ts              # GND, VDD, VCC, VSS power symbols
     │
     └── tab3/                         # SPICE Simulator UI (Tab 3)
-        ├── simulator.ts              # Layout, netlist textarea, run button, backend health ping, waveform load
-        ├── sim-controls.ts           # Simulation parameter form: .tran / .ac / .dc controls
+        ├── simulator.ts              # Layout, netlist textarea, run button, backend health ping, waveform/table load
+        ├── sim-controls.ts           # Simulation parameter form: .tran / .ac / .dc / .op / .noise / .tf / .step
         ├── waveform-viewer.ts        # SVG multi-trace waveform plotter: zoom (wheel), pan (drag), probe toggle
         └── simulator.css             # Tab 3 styles: sidebar/main flex layout, waveform SVG wrapper
 ```
@@ -326,6 +339,8 @@ Output goes to `dist/` — serve with any static file host. The backend must sti
 3. The schematic renders as an SVG on the right.
 4. Click **Download .asc** to save a valid LTspice schematic file.
 
+If the netlist references components from external `.lib` files not pasted inline, a yellow bar appears listing the missing parts. Upload the `.lib` / `.sub` files to resolve them and re-run automatically.
+
 **Example input:**
 ```spice
 * RC Low-pass filter
@@ -349,10 +364,22 @@ C1 out 0 1n
 ### Tab 3 — SPICE Simulator
 
 1. Netlist appears automatically if sent from Tab 2, or paste one directly.
-2. Choose simulation type (Transient / AC / DC) and set parameters.
+2. Choose simulation type and set parameters (see table below).
 3. Click **▶ Run**. The backend status indicator shows online/offline.
 4. Waveforms render in the right panel. Use mouse wheel to zoom, drag to pan.
 5. Click probe buttons at the top to toggle individual traces.
+
+**Supported simulation types:**
+
+| Type | SPICE directive | Parameters |
+|---|---|---|
+| Transient | `.tran` | Stop time, time step |
+| AC Sweep | `.ac` | Scale (dec/oct/lin), pts/decade, start/stop freq |
+| DC Sweep | `.dc` | Source name, start, stop, step |
+| Operating Point | `.op` | None |
+| Noise | `.noise` | Output node, input source, freq sweep |
+| Transfer Function | `.tf` | Output variable, input source |
+| Parameter Sweep | `.step` | Param name, start, stop, increment, inner sim |
 
 ### Keyboard Shortcuts (Tab 2)
 
@@ -404,6 +431,7 @@ C1 out 0 1n
 |---|---|---|
 | `NGSPICE_BIN` | `ngspice` | Path or name of the ngspice executable |
 | `NGSPICE_TIMEOUT` | `30` | Max seconds per simulation run |
+| `NGSPICE_SPICELIB` | `/spicelib` | Directory of bundled `.lib`/`.mod` files copied into each ngspice temp run |
 
 Set via environment variables or in `docker-compose.yml`.
 
@@ -514,12 +542,30 @@ refactor(backend): split runner into raw_parser and netlist modules
 | ✅ Done | Live multi-trace waveform viewer (zoom, pan, probe toggle) | v5.0 |
 | ✅ Done | Transient / AC / DC sweep simulation types | v5.0 |
 | ✅ Done | Codebase modularisation (single-responsibility modules) | v5.0 |
-| 📋 Planned | AC phase plot (separate magnitude/phase traces) | v5.1 |
-| 📋 Planned | Cursor / measurement markers on waveform | v5.1 |
+| ✅ Done | Standard library resolver (Situation 2): auto-inject `.model`/`.subckt` from `stdlib_db.json` | v5.1 |
+| ✅ Done | Missing-libs UI: yellow bar + `.lib`/`.sub` file upload for unresolved parts | v5.1 |
+| ✅ Done | All 7 simulation types: .tran / .ac / .dc / .op / .noise / .tf / .step | v5.1 |
+| 📋 Planned | AC phase plot (separate magnitude/phase traces) | v5.2 |
+| 📋 Planned | Cursor / measurement markers on waveform | v5.2 |
 | 📋 Planned | Import `.asc` file back into Tab 2 canvas | v6.0 |
 | 📋 Planned | Multi-page / hierarchical schematics | v6.0 |
 | 💡 Exploring | PWA / offline mode with service worker | Future |
 | 💡 Exploring | WebAssembly ngspice (fully client-side simulation) | Future |
+
+---
+
+## 📚 Documentation
+
+Detailed technical documentation lives in the [`docs/`](./docs/) folder:
+
+| File | Contents |
+|---|---|
+| [`docs/tab1-pipeline.md`](./docs/tab1-pipeline.md) | Full 14-stage Tab 1 conversion pipeline with worked example |
+| [`docs/tab2-editor.md`](./docs/tab2-editor.md) | Schematic editor internals: canvas, state, ERC, export |
+| [`docs/tab3-simulator.md`](./docs/tab3-simulator.md) | Simulator UI, all 7 sim types, backend API reference |
+| [`docs/elk.md`](./docs/elk.md) | ELK layout engine deep-dive: graph format, algorithm, timeout |
+| [`docs/stdlib.md`](./docs/stdlib.md) | Standard library resolver, `stdlib_db.json` build process |
+| [`docs/docker.md`](./docs/docker.md) | Docker setup, services, environment variables, spicelib |
 
 ---
 
