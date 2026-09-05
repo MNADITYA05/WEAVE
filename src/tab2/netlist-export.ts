@@ -2,7 +2,7 @@
  * netlist-export.ts — SPICE netlist generation, LTspice .asc export, ERC
  */
 import type { RotCode } from './types.js';
-import { SYMDEFS, LOGIC_BEXPR } from './schematic-symbols.js';
+import { SYMDEFS, LOGIC_BEXPR, IC_SYMDEFS, makeIcSymDef } from './schematic-symbols.js';
 import type { SymDef } from './schematic-symbols.js';
 import { S } from './state.js';
 import { rotPt, getEffectivePins } from './rotation.js';
@@ -16,7 +16,7 @@ export function generateNetlist(): string {
   const pts = new Set<string>();
   for (const w of S.wires) { pts.add(w.x1 + ',' + w.y1); pts.add(w.x2 + ',' + w.y2); }
   for (const c of S.comps) {
-    const def: SymDef | undefined = SYMDEFS[c.type]; if (!def) continue;
+    const def: SymDef | undefined = SYMDEFS[c.type] ?? (c.type.startsWith('IC:') ? (IC_SYMDEFS.get(c.type) ?? makeIcSymDef(c.type.slice(3)) ?? undefined) : undefined); if (!def) continue;
     // Fix 5: use effective pins so X subcircuit nets are correct
     for (const p of getEffectivePins(c)) {
       const rp = rotPt(p, c.rot);
@@ -33,7 +33,7 @@ export function generateNetlist(): string {
   }
   const gname = new Map<string, string>();
   for (const c of S.comps) {
-    const def: SymDef | undefined = SYMDEFS[c.type]; if (!def?.netName) continue;
+    const def: SymDef | undefined = SYMDEFS[c.type] ?? (c.type.startsWith('IC:') ? (IC_SYMDEFS.get(c.type) ?? makeIcSymDef(c.type.slice(3)) ?? undefined) : undefined); if (!def?.netName) continue;
     const rp = rotPt(def.pins[0]!, c.rot);
     const k = (c.x + rp[0]) + ',' + (c.y + rp[1]);
     gname.set(uf.find(k), def.netName);
@@ -56,7 +56,7 @@ export function generateNetlist(): string {
   const swModelCards: string[] = [];
 
   for (const c of S.comps) {
-    const def: SymDef | undefined = SYMDEFS[c.type];
+    const def: SymDef | undefined = SYMDEFS[c.type] ?? (c.type.startsWith('IC:') ? (IC_SYMDEFS.get(c.type) ?? makeIcSymDef(c.type.slice(3)) ?? undefined) : undefined);
     if (!def || def.netName) continue;
     if (!c.name) continue;
     // Fix 5: use effective pins for net resolution

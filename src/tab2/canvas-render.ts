@@ -2,7 +2,7 @@
  * canvas-render.ts — SVG render, ghost preview, zoom-to-fit, title block
  */
 import type { SymDef } from './schematic-symbols.js';
-import { SYMDEFS } from './schematic-symbols.js';
+import { SYMDEFS, IC_SYMDEFS, makeIcSymDef } from './schematic-symbols.js';
 import { S, _junctionsDirty, clearJunctionsDirty } from './state.js';
 import { getEffectivePins, svgTransform } from './rotation.js';
 import { computeEditorJunctions, snapToPin } from './hit-test.js';
@@ -55,20 +55,26 @@ export function render(): void {
 
   let csvg = '';
   for (const c of S.comps) {
-    const def: SymDef | undefined = SYMDEFS[c.type];
+    const def: SymDef | undefined = SYMDEFS[c.type] ?? (c.type.startsWith('IC:') ? (IC_SYMDEFS.get(c.type) ?? makeIcSymDef(c.type.slice(3)) ?? undefined) : undefined);
     if (!def) continue;
     const isSel  = c.id === S.sel;
     const stroke = isSel ? '#1a7fd4' : '#1a1a1a';
     const pins   = getEffectivePins(c);
+    const isIC   = c.type.startsWith('IC:');
+    const selPad = isIC ? 8 : 6;
+    const selMinX = isIC ? Math.min(...def.pins.map(p => p[0])) - selPad : -38;
+    const selMinY = isIC ? Math.min(...def.pins.map(p => p[1])) - selPad : -44;
+    const selW    = isIC ? Math.max(...def.pins.map(p => p[0])) - selMinX + selPad : 76;
+    const selH    = isIC ? Math.max(...def.pins.map(p => p[1])) - selMinY + selPad : 88;
     csvg += `<g id="scc-${c.id}" data-cid="${c.id}" transform="translate(${c.x},${c.y}) ${svgTransform(c.rot)}" style="cursor:pointer">`;
-    if (isSel) csvg += `<rect x="-38" y="-44" width="76" height="88" fill="#1a7fd440" stroke="#1a7fd4" stroke-width="1" rx="3" stroke-dasharray="4,2"/>`;
+    if (isSel) csvg += `<rect x="${selMinX}" y="${selMinY}" width="${selW}" height="${selH}" fill="#1a7fd440" stroke="#1a7fd4" stroke-width="1" rx="3" stroke-dasharray="4,2"/>`;
     csvg += `<g stroke="${stroke}" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" color="${stroke}">`;
     csvg += def.svg;
     csvg += '</g>';
     if (def.refOffset && c.name)  csvg += `<text x="${def.refOffset[0]}" y="${def.refOffset[1]}" font-size="11" fill="${stroke}" font-family="monospace" style="user-select:none">${c.name}</text>`;
     if (def.valOffset && c.value) csvg += `<text x="${def.valOffset[0]}" y="${def.valOffset[1]}" font-size="10" fill="#666" font-family="monospace" style="user-select:none">${c.value}</text>`;
     for (const [px, py] of pins) csvg += `<circle cx="${px}" cy="${py}" r="2.5" fill="${isSel ? '#1a7fd4' : '#888'}" stroke="none"/>`;
-    csvg += `<rect x="-38" y="-44" width="76" height="88" fill="transparent"/>`;
+    csvg += `<rect x="${selMinX}" y="${selMinY}" width="${selW}" height="${selH}" fill="transparent"/>`;
     csvg += '</g>';
   }
   compL.innerHTML = csvg;
@@ -135,7 +141,7 @@ ${isSel ? `<rect x="${a.x - 2}" y="${a.y - a.fontSize - 2}" width="${Math.max(..
 
 export function renderGhost(): void {
   if (S.mode !== 'place' || !S.placing) { ghostL.innerHTML = ''; return; }
-  const def: SymDef | undefined = SYMDEFS[S.placing];
+  const def: SymDef | undefined = SYMDEFS[S.placing] ?? (S.placing.startsWith('IC:') ? (IC_SYMDEFS.get(S.placing) ?? makeIcSymDef(S.placing.slice(3)) ?? undefined) : undefined);
   if (!def) return;
   const { x, y } = S.mouse;
   const previewPins = def.pins;

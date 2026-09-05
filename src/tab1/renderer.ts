@@ -12,7 +12,8 @@
 
 import { rot, ROT_MAT, _svgMat } from '../shared/geometry.js';
 import { NOROT } from './orientation.js';
-import { SYMBOLS, SYM_DRAW } from './symbols.js';
+import { SYMBOLS, SYM_DRAW, SUBCKT2SYM, SYM_PIN_NAMES, prewarmFullSymDraw, getFullSymDrawSync } from './symbols.js';
+import type { SvgShape } from './symbols.js';
 import type { RotCode } from '../types.js';
 
 // ─── Internal types ───────────────────────────────────────────────────────────
@@ -67,7 +68,7 @@ export function setAscView(mode: string): void {
   av.style.display = mode === 'text' ? '' : 'none';
   if (mode === 'visual') {
     sv.classList.add('vis-on');
-    if (_lastAsc) renderSchematic(_lastAsc);
+    if (_lastAsc) void renderSchematic(_lastAsc);
   } else {
     sv.classList.remove('vis-on');
   }
@@ -132,19 +133,131 @@ function _symKey(s: RenderSym): string | null {
   return null;
 }
 
+/** Renders a DIP IC block for a symtable-matched component in the visual view.
+ *  Pin stub endpoints use the actual symtable pin coordinates so they align
+ *  with routed wires (which also use entry.pins via decorateComponents). */
+function _renderIcBlock(s: RenderSym): string {
+  const symKey   = SUBCKT2SYM[s.key];
+  const entry    = symKey ? SYMBOLS[symKey] : null;
+  const base     = s.key.split('\\').pop()!;
+  const SK       = '#1a3a8a';
+  const m        = _svgMat(s.rot as RotCode);
+  // sym-pin-names key: 'Misc\\NE555' → 'misc/ne555'
+  const fdKey    = symKey ? symKey.replace(/\\/g, '/').toLowerCase() : null;
+  const pinNames = fdKey ? (SYM_PIN_NAMES[fdKey] ?? null) : null;
+
+  if (entry && entry.pins.length > 0) {
+    // ── Use actual symtable pin positions (same coords the router uses) ──────
+    const pins = entry.pins as [number, number][];
+    const xs   = pins.map(p => p[0]);
+    const ys   = pins.map(p => p[1]);
+    const minX = Math.min(...xs), maxX = Math.max(...xs);
+    const minY = Math.min(...ys), maxY = Math.max(...ys);
+    const midX = (minX + maxX) / 2;
+
+    // Body rect sits between the two pin columns, padded inward
+    const BODY_INSET = 8;
+    const leftPinX  = Math.max(...xs.filter(x => x <= midX));
+    const rightPinX = Math.min(...xs.filter(x => x >  midX));
+    const bodyL = leftPinX  + BODY_INSET;
+    const bodyR = rightPinX - BODY_INSET;
+    const bodyT = minY - BODY_INSET;
+    const bodyB = maxY + BODY_INSET;
+    const bodyCX = (bodyL + bodyR) / 2;
+    const bodyCY = (bodyT + bodyB) / 2;
+
+    // ── Try real LTspice geometry from sym-draw-full (pre-warmed cache) ──────
+    const fullShapes: SvgShape[] | null = fdKey ? getFullSymDrawSync(fdKey) : null;
+
+    let g = `<g transform="translate(${s.x},${s.y}) ${m}">`;
+
+    if (fullShapes && fullShapes.length > 0) {
+      // Render real LTspice symbol geometry
+      for (const sh of fullShapes) {
+        if (sh.t === 'line') {
+          g += `<line x1="${sh.x1}" y1="${sh.y1}" x2="${sh.x2}" y2="${sh.y2}" stroke="${SK}" stroke-width="1.5" stroke-linecap="round"/>`;
+        } else if (sh.t === 'ellipse') {
+          g += `<ellipse cx="${sh.cx}" cy="${sh.cy}" rx="${sh.rx}" ry="${sh.ry}" stroke="${SK}" fill="none" stroke-width="1.5"/>`;
+        } else if (sh.t === 'rect') {
+          g += `<rect x="${sh.x}" y="${sh.y}" width="${sh.w}" height="${sh.h}" stroke="${SK}" fill="#e8eef8" stroke-width="1.5"/>`;
+        } else if (sh.t === 'arc') {
+          const d = `M${sh.x1!.toFixed(2)},${sh.y1!.toFixed(2)} A${sh.rx},${sh.ry} 0 ${sh.large},${sh.sweep} ${sh.x2!.toFixed(2)},${sh.y2!.toFixed(2)}`;
+          g += `<path d="${d}" stroke="${SK}" fill="none" stroke-width="1.5" stroke-linecap="round"/>`;
+        }
+      }
+    } else {
+      // Fallback: plain rectangle body with label
+      g += `<rect x="${bodyL}" y="${bodyT}" width="${bodyR - bodyL}" height="${bodyB - bodyT}" rx="3" stroke="${SK}" fill="#e8eef8" stroke-width="1.5"/>`;
+      g += `<text x="${bodyCX}" y="${bodyCY + 3}" text-anchor="middle" font-size="8" font-family="ui-monospace,monospace" fill="${SK}">${_esc(base.toUpperCase())}</text>`;
+    }
+
+    // Pin stubs: line from actual pin coord to body edge
+    // Label with real pin name (from LTspice .asy) if available, else pin number
+    pins.forEach((p, i) => {
+      const [px, py] = p;
+      const isLeft   = px <= midX;
+      const edgeX    = isLeft ? bodyL : bodyR;
+      const label    = pinNames?.[String(i)] ?? String((entry.ord && entry.ord[i] != null) ? entry.ord[i] : i + 1);
+      g += `<line x1="${px}" y1="${py}" x2="${edgeX}" y2="${py}" stroke="${SK}" stroke-width="1.2"/>`;
+      const tx = isLeft ? edgeX + 3 : edgeX - 3;
+      const anchor = isLeft ? 'start' : 'end';
+      g += `<text x="${tx}" y="${py + 3}" font-size="6" font-family="ui-monospace,monospace" fill="${SK}" text-anchor="${anchor}">${_esc(label)}</text>`;
+    });
+
+    g += '</g>';
+
+    // Ref / value labels outside the block (upper-right of body)
+    const lx = s.x + rightPinX + 6;
+    const ly = s.y + bodyT;
+    if (s.name)  g += `<text x="${lx}" y="${ly}" font-size="10" font-family="ui-monospace,monospace" font-weight="600" fill="#122060">${_esc(s.name)}</text>`;
+    if (s.value) g += `<text x="${lx}" y="${ly + 13}" font-size="9" font-family="ui-monospace,monospace" fill="#3a5a80">${_esc(s.value)}</text>`;
+    return g;
+  }
+
+  // ── Fallback: generic DIP layout (no symtable entry) ─────────────────────
+  const N          = 8;
+  const leftCount  = Math.ceil(N / 2);
+  const rightCount = N - leftCount;
+  const ROW_H      = 20;
+  const H          = Math.max(48, leftCount * ROW_H);
+  const BODY_W     = 64;
+  const STUB       = 16;
+  const HW         = BODY_W / 2;
+
+  let g = `<g transform="translate(${s.x},${s.y}) ${m}">`;
+  g += `<rect x="${-HW}" y="${-H / 2}" width="${BODY_W}" height="${H}" rx="3" stroke="${SK}" fill="#e8eef8" stroke-width="1.5"/>`;
+  g += `<text x="0" y="4" text-anchor="middle" font-size="8" font-family="ui-monospace,monospace" fill="${SK}">${_esc(base.toUpperCase())}</text>`;
+  for (let i = 0; i < leftCount; i++) {
+    const y = -H / 2 + ROW_H / 2 + i * ROW_H;
+    g += `<line x1="${-HW - STUB}" y1="${y}" x2="${-HW}" y2="${y}" stroke="${SK}" stroke-width="1.2"/>`;
+    g += `<text x="${-HW + 3}" y="${y + 3}" font-size="6" font-family="ui-monospace,monospace" fill="${SK}">${i + 1}</text>`;
+  }
+  for (let i = 0; i < rightCount; i++) {
+    const y = -H / 2 + ROW_H / 2 + i * ROW_H;
+    g += `<line x1="${HW}" y1="${y}" x2="${HW + STUB}" y2="${y}" stroke="${SK}" stroke-width="1.2"/>`;
+    g += `<text x="${HW - 3}" y="${y + 3}" font-size="6" font-family="ui-monospace,monospace" fill="${SK}" text-anchor="end">${N - i}</text>`;
+  }
+  g += '</g>';
+  const lx = s.x + HW + STUB + 4;
+  const ly = s.y - H / 2 - 4;
+  if (s.name)  g += `<text x="${lx}" y="${ly}" font-size="10" font-family="ui-monospace,monospace" font-weight="600" fill="#122060">${_esc(s.name)}</text>`;
+  if (s.value) g += `<text x="${lx}" y="${ly + 13}" font-size="9" font-family="ui-monospace,monospace" fill="#3a5a80">${_esc(s.value)}</text>`;
+  return g;
+}
+
 function _drawShapes(key: string): string {
   const sym = SYM_DRAW[key];
   if (!sym?.draw) return '';
   const SK = '#1a3a8a';
   let g = '';
   for (const sh of sym.draw) {
-    if (sh.t === 'l') {
+    if (sh.t === 'line') {
       g += `<line x1="${sh.x1}" y1="${sh.y1}" x2="${sh.x2}" y2="${sh.y2}" stroke="${SK}" stroke-width="1.5" stroke-linecap="round"/>`;
-    } else if (sh.t === 'e') {
+    } else if (sh.t === 'ellipse') {
       g += `<ellipse cx="${sh.cx}" cy="${sh.cy}" rx="${sh.rx}" ry="${sh.ry}" stroke="${SK}" fill="none" stroke-width="1.5"/>`;
-    } else if (sh.t === 'r') {
+    } else if (sh.t === 'rect') {
       g += `<rect x="${sh.x}" y="${sh.y}" width="${sh.w}" height="${sh.h}" stroke="${SK}" fill="none" stroke-width="1.5"/>`;
-    } else if (sh.t === 'a') {
+    } else if (sh.t === 'arc') {
       const d = `M${sh.x1!.toFixed(2)},${sh.y1!.toFixed(2)} A${sh.rx},${sh.ry} 0 ${sh.large},${sh.sweep} ${sh.x2!.toFixed(2)},${sh.y2!.toFixed(2)}`;
       g += `<path d="${d}" stroke="${SK}" fill="none" stroke-width="1.5" stroke-linecap="round"/>`;
     }
@@ -158,10 +271,10 @@ function _symBbox(key: string): { minX: number; minY: number; maxX: number; maxY
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
   for (const sh of sym.draw) {
     const pts: [number, number][] =
-      sh.t === 'l' ? [[sh.x1!, sh.y1!], [sh.x2!, sh.y2!]]
-    : sh.t === 'e' ? [[sh.cx! - sh.rx!, sh.cy! - sh.ry!], [sh.cx! + sh.rx!, sh.cy! + sh.ry!]]
-    : sh.t === 'r' ? [[sh.x!, sh.y!], [sh.x! + sh.w!, sh.y! + sh.h!]]
-    : sh.t === 'a' ? [[sh.cx! - sh.rx!, sh.cy! - sh.ry!], [sh.cx! + sh.rx!, sh.cy! + sh.ry!]]
+      sh.t === 'line' ? [[sh.x1!, sh.y1!], [sh.x2!, sh.y2!]]
+    : sh.t === 'ellipse' ? [[sh.cx! - sh.rx!, sh.cy! - sh.ry!], [sh.cx! + sh.rx!, sh.cy! + sh.ry!]]
+    : sh.t === 'rect' ? [[sh.x!, sh.y!], [sh.x! + sh.w!, sh.y! + sh.h!]]
+    : sh.t === 'arc' ? [[sh.cx! - sh.rx!, sh.cy! - sh.ry!], [sh.cx! + sh.rx!, sh.cy! + sh.ry!]]
     : [];
     for (const [x, y] of pts) {
       minX = Math.min(minX, x); minY = Math.min(minY, y);
@@ -224,6 +337,25 @@ function _esc(t: unknown): string {
 
 function _renderSym(s: RenderSym): string {
   const resolvedKey = _symKey(s);
+
+  // X-prefix subcircuits that are NOT opamp aliases → DIP IC block
+  // Opamp-aliased subcircuits (LM741, OP27, etc.) keep the triangle render below.
+  if (resolvedKey !== 'opamp') {
+    const isSubckt = !!(s.name && s.name.startsWith('X'));
+    if (isSubckt) {
+      const isKnownIc = !!(SUBCKT2SYM[s.key] && SYMBOLS[SUBCKT2SYM[s.key]]);
+      const isGeneric = s.key.startsWith('__block');
+      if (isKnownIc || isGeneric) return _renderIcBlock(s);
+    }
+  }
+
+  // IC block: unknown/unresolved non-opamp component
+  if (!resolvedKey) {
+    const isKnownIc = !!(SUBCKT2SYM[s.key] && SYMBOLS[SUBCKT2SYM[s.key]]);
+    const isGeneric = s.key.startsWith('__block');
+    if (isKnownIc || isGeneric) return _renderIcBlock(s);
+  }
+
   const m  = _svgMat(s.rot as RotCode);
   const SK = '#1a3a8a';
   let g = `<g transform="translate(${s.x},${s.y}) ${m}">`;
@@ -249,13 +381,22 @@ function _renderSym(s: RenderSym): string {
 
 // ─── renderSchematic ──────────────────────────────────────────────────────────
 
-export function renderSchematic(ascText: string): void {
+export async function renderSchematic(ascText: string): Promise<void> {
   if (ascText) _lastAsc = ascText;
   if (_ascViewMode !== 'visual') return;
   const svg = document.getElementById('schsvg') as SVGSVGElement | null;
   if (!svg || !ascText) return;
 
   const data = _parseAscR(ascText);
+
+  // Pre-warm sym-draw-full cache for all IC symbols in this schematic
+  const icFdKeys = data.syms
+    .map(s => {
+      const symKey = SUBCKT2SYM[s.key];
+      return symKey ? symKey.replace(/\\/g, '/').toLowerCase() : null;
+    })
+    .filter((k): k is string => k !== null);
+  if (icFdKeys.length > 0) await prewarmFullSymDraw([...new Set(icFdKeys)]);
   const bb   = _bbox(data);
   svg.setAttribute('viewBox', `${bb.x} ${bb.y} ${bb.w} ${bb.h}`);
 

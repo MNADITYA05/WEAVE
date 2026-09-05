@@ -4,7 +4,7 @@
  * Depends on: SYMDEFS, PALETTE_GROUPS (schematic-symbols.ts)
  */
 
-import { SYMDEFS, PALETTE_GROUPS, LOGIC_BEXPR } from './schematic-symbols.js';
+import { SYMDEFS, PALETTE_GROUPS, LOGIC_BEXPR, IC_SYMDEFS, makeIcSymDef, searchICs } from './schematic-symbols.js';
 import type { SymDef } from './schematic-symbols.js';
 import { onSeg } from '../shared/geometry.js';
 import { UF } from '../shared/union-find.js';
@@ -270,6 +270,22 @@ function buildPalette(el: HTMLElement): void {
         h += `<button class="sc-pb" data-type="${t}" title="${def.label}">${preview}<span>${def.label}</span></button>`;
       }
     }
+    // IC picker: append symtable results when query is 2+ chars
+    if (q.length >= 2) {
+      const icMatches = searchICs(q);
+      if (icMatches.length > 0) {
+        if (!h) h = '';
+        h += `<div class="sc-pg-title">ICs (symtable)</div>`;
+        for (const m of icMatches) {
+          const typeKey = 'IC:' + m.key;
+          const def = IC_SYMDEFS.get(typeKey) ?? makeIcSymDef(m.key);
+          if (!def) continue;
+          const preview = `<svg width="28" height="28" viewBox="-56 -56 112 112" style="overflow:visible">
+<g stroke="#aaa" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" color="#aaa">${def.svg}</g></svg>`;
+          h += `<button class="sc-pb" data-type="${typeKey}" title="${m.label} (${m.npins} pins, ${m.category})">${preview}<span>${m.label}</span></button>`;
+        }
+      }
+    }
     if (!h) h = '<div style="color:#666;font-size:11px;padding:8px 6px">No matches</div>';
     listEl.innerHTML = h;
     listEl.querySelectorAll<HTMLButtonElement>('.sc-pb').forEach(btn => {
@@ -295,7 +311,8 @@ function enterPlace(type: string): void {
   document.querySelectorAll<HTMLButtonElement>('.sc-pb').forEach(b =>
     b.classList.toggle('sc-active', b.dataset['type'] === type));
   svgEl.style.cursor = 'crosshair';
-  updateHint(`Placing ${SYMDEFS[type]?.label ?? type} — Left-click to place · R=rotate · M=mirror · Right-click=rotate · Esc=cancel`);
+  const _placingDef = SYMDEFS[type] ?? (type.startsWith('IC:') ? (IC_SYMDEFS.get(type) ?? makeIcSymDef(type.slice(3))) : null);
+  updateHint(`Placing ${_placingDef?.label ?? type} — Left-click to place · R=rotate · M=mirror · Right-click=rotate · Esc=cancel`);
   renderGhost();
 }
 
@@ -962,10 +979,25 @@ function bindEvents(root: HTMLElement): void {
 
 function placeComp(x: number, y: number): void {
   if (!S.placing) return;
+  let compName: string;
+  let compValue: string;
+  let compExtra: import('./types.js').CompExtra = {};
+  if (S.placing.startsWith('IC:')) {
+    const icDef = IC_SYMDEFS.get(S.placing) ?? makeIcSymDef(S.placing.slice(3));
+    const base  = icDef?.label ?? S.placing.split('\\').pop() ?? 'U';
+    const n = (S.counters['XU'] ?? 0) + 1;
+    S.counters['XU'] = n;
+    compName  = 'XU' + n;
+    compValue = base;
+    compExtra = { model: base };
+  } else {
+    compName  = autoName(S.placing);
+    compValue = defaultValue(S.placing);
+  }
   const comp: Comp = {
     id: uid(), type: S.placing,
-    name: autoName(S.placing), value: defaultValue(S.placing),
-    x, y, rot: S.placingRot, extra: {},
+    name: compName, value: compValue,
+    x, y, rot: S.placingRot, extra: compExtra,
   };
   S.comps.push(comp);
   // Fix 2: split any wire that this component's pin lands on
