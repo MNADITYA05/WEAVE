@@ -4,6 +4,50 @@ Tab 2 is a fully interactive browser-based schematic editor built on an SVG canv
 
 ---
 
+## How Tab 2 Works — Visual Flow
+
+```mermaid
+flowchart TD
+    START([🖥️ You open Tab 2\nBlank canvas appears]) --> PLACE
+
+    PLACE["🔧 Pick a component from the palette\ne.g. Resistor, Capacitor, Transistor\nClick the canvas to place it"]
+    PLACE --> ROTATE["🔄 Optional: Press R to rotate\nor M to mirror before placing"]
+    ROTATE --> WIRE["〰️ Press W to draw wires\nClick two points to connect components\nWires snap to component pins automatically"]
+    WIRE --> LABEL["🏷️ Optional: Press N to add a net label\ne.g. name a wire 'VCC' or 'GND'\nPress D to add a simulation directive\ne.g. .tran 1m 10m"]
+    LABEL --> MORE{More components\nor wires to add?}
+    MORE -- Yes --> PLACE
+    MORE -- No --> ACTION
+
+    ACTION{What do you want to do?}
+
+    ACTION -- Convert --> NETLIST["📋 Click Convert\nWeave traces all wire connections\nand generates a SPICE netlist automatically"]
+    ACTION -- Simulate --> SIM["▶️ Click Simulate\nNetlist is sent directly to Tab 3\nRun a real simulation instantly"]
+    ACTION -- Download --> EXPORT["💾 Download as:\n.net  — SPICE netlist\n.asc  — LTspice schematic\nSVG   — vector image\nPNG   — raster image"]
+    ACTION -- Undo --> UNDO["↩️ Press Ctrl+Z to undo\nUp to 50 steps of history\nSurvives page refresh"]
+    ACTION -- ERC --> ERC["✅ Run ERC\nChecks for unconnected pins,\nfloating wires, duplicate names"]
+
+    NETLIST --> DONE([✅ SPICE netlist ready\nin the right panel])
+    SIM --> TAB3([🔬 Tab 3 opens with your netlist])
+    EXPORT --> FILE([📁 File saved to your computer])
+
+    style START fill:#4F46E5,color:#fff,stroke:none
+    style DONE fill:#059669,color:#fff,stroke:none
+    style TAB3 fill:#059669,color:#fff,stroke:none
+    style FILE fill:#059669,color:#fff,stroke:none
+```
+
+### How wire connections become net names
+
+```mermaid
+flowchart LR
+    A["All component pins\nhave world coordinates\ne.g. R1-left = 160,192"] --> B["Union-Find algorithm\nMerges pins that share\na wire segment"]
+    B --> C{"Does any pin\nhave a net label?"}
+    C -- Yes --> D["Use that label name\ne.g. 'VCC', 'GND', 'out'"]
+    C -- No --> E["Auto-generate\ne.g. N001, N002, N003"]
+    D --> F["Emit SPICE line\ne.g. R1 VCC out 1k"]
+    E --> F
+```
+
 ## Architecture
 
 ```

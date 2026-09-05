@@ -4,6 +4,39 @@ ELK (Eclipse Layout Kernel) is an open-source graph layout engine used in Tab 1 
 
 ---
 
+## What ELK Does — Simple Explanation
+
+Imagine you have a list of circuit components (resistors, capacitors, transistors) and you know which ones are connected. But you have **no idea where to draw them on the page**. ELK solves exactly that — it figures out the x,y position for every component so the result looks like a proper schematic, not a mess.
+
+```mermaid
+flowchart TD
+    PROB(["❓ Problem:\nWe know R1 connects to C1\nbut WHERE do we draw them?"]) --> ELK
+
+    ELK["🧠 ELK Layout Engine\nTreats the circuit as a graph:\nComponents = nodes\nWires = edges"]
+
+    ELK --> P1["Phase 1 — Break Cycles\nCircuits can have feedback loops\nTemporarily remove them so\nthe layout doesn't get confused"]
+    P1 --> P2["Phase 2 — Assign Columns\nPower sources go on the LEFT\nLoads go on the RIGHT\nEach component gets a column number"]
+    P2 --> P3["Phase 3 — Reduce Crossings\nReorder components within each column\nso wires between columns\ncross as little as possible"]
+    P3 --> P4["Phase 4 — Set Exact Positions\nGive every component a precise x,y\nBalanced and evenly spaced"]
+    P4 --> OUT(["✅ Output:\nEvery component has a position\nWeave snaps them to a 16px grid\nand draws the wires"])
+
+    style PROB fill:#DC2626,color:#fff,stroke:none
+    style OUT fill:#059669,color:#fff,stroke:none
+    style ELK fill:#4F46E5,color:#fff,stroke:none
+```
+
+### The two-pass strategy Weave uses
+
+```mermaid
+flowchart LR
+    A["Pass 1 — Rough layout\nNo constraints\nELK places freely"] --> B["Analyse result\nFind feedback components\nAssign rank hints"]
+    B --> C["Pass 2 — Refined layout\nFeedback components pinned\nto correct columns"]
+    C --> D["apply-layout.ts\nSnap all positions\nto 16px grid"]
+    D --> E(["Final schematic\npositions ready"])
+
+    style E fill:#059669,color:#fff,stroke:none
+```
+
 ## Why ELK?
 
 A SPICE netlist has no position information — it only specifies connectivity. To produce a readable schematic, components must be placed at (x, y) coordinates and connected by wires that don't overlap awkwardly. This is the **graph layout problem**.

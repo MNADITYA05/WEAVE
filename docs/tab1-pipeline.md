@@ -4,7 +4,38 @@ Tab 1 converts a plain-text SPICE netlist into a downloadable LTspice `.asc` sch
 
 ---
 
-## Pipeline Overview
+## Pipeline Overview — Visual Flow
+
+```mermaid
+flowchart TD
+    START([🖊️ You paste a SPICE netlist\ne.g. V1 R1 C1 connected together]) --> S0
+
+    S0["🔍 Stage 0 — Library Lookup\nCheck if part names like '1N4148' or 'LM741'\nexist in the built-in component library.\nIf yes → inject their definition automatically."]
+    S0 --> MISSING{Any parts\nnot found?}
+    MISSING -- Yes --> WARN["⚠️ Yellow bar appears\nAsking you to upload the\nmissing .lib files"]
+    MISSING -- No --> S1
+    WARN --> S1
+
+    S1["📖 Stage 1 — Read the Netlist\nUnderstand what components exist\n(resistors, capacitors, voltage sources…)\nand how they are connected"]
+    S1 --> S2["🏷️ Stage 2 — Identify the Pattern\nIs this a series circuit? Parallel?\nDoes it have feedback? A bridge?"]
+    S2 --> S3["🧭 Stage 3 — Decide Orientation\nWhich components go left-to-right?\nWhich ones hang vertically to ground?"]
+    S3 --> S4["🔄 Stage 4 — Find Feedback Loops\nDetect if any output connects\nback to an earlier input"]
+    S4 --> S5["📐 Stage 5-7 — Auto Layout (ELK)\nAn algorithm figures out where\nto place every component on the page\nso wires don't cross awkwardly"]
+    S5 --> S6["📌 Stage 8 — Apply Positions\nTranslate the layout into real\nschematic coordinates"]
+    S6 --> S7["🔧 Stage 9 — Fix Overlaps\nPush any overlapping components\napart so nothing is on top of each other"]
+    S7 --> S8["〰️ Stage 10 — Draw Wires\nConnect component pins with\nneat axis-aligned wire segments"]
+    S8 --> S9["🩹 Stage 11 — Repair Connections\nFix any dangling or broken wires\nand resolve crossing conflicts"]
+    S9 --> S10["🚩 Stage 12 — Add Power Symbols\nPlace GND, VCC, VDD flags\nat the right locations"]
+    S10 --> S11["📄 Stage 13 — Write the .asc File\nGenerate the actual LTspice\nschematic file text"]
+    S11 --> S12["✂️ Stage 14 — Clean Up Wires\nMerge short wire pieces into\nlong clean lines; add junction dots"]
+    S12 --> DONE([✅ Schematic ready!\nDownload .asc or view SVG preview])
+
+    style START fill:#4F46E5,color:#fff,stroke:none
+    style DONE fill:#059669,color:#fff,stroke:none
+    style WARN fill:#D97706,color:#fff,stroke:none
+```
+
+## Pipeline Overview — Stage List
 
 ```
 Stage 0   lib-resolver.ts      Resolve stdlib references → inject .model/.subckt

@@ -4,6 +4,43 @@ Tab 3 connects the browser frontend to a real **ngspice** simulation engine runn
 
 ---
 
+## How Tab 3 Works — Visual Flow
+
+```mermaid
+flowchart TD
+    START([🖊️ You have a SPICE netlist\nTyped in, or sent from Tab 2]) --> SIMTYPE
+
+    SIMTYPE["⚙️ Choose simulation type\ne.g. Transient — how does voltage change over time?\nor AC Sweep — how does the circuit behave at different frequencies?"]
+    SIMTYPE --> PARAMS["📝 Fill in the parameters\ne.g. Stop time = 10ms, Time step = 1µs"]
+    PARAMS --> RUN["▶️ Click Run\nNetlist + parameters sent to the backend"]
+
+    RUN --> BACKEND["🖥️ Backend receives the netlist\nFastAPI server running in Docker"]
+    BACKEND --> NGSPICE["⚡ ngspice runs the simulation\nIndustry-standard SPICE simulator\nWrites results to a .raw file"]
+    NGSPICE --> PARSE["📊 Results are read and parsed\nExtract voltage/current values\nat each time or frequency point"]
+    PARSE --> JSON["📦 Send data back to browser\nas a list of numbers (JSON)"]
+
+    JSON --> WAVE["📈 Waveform viewer renders the plot\nSVG multi-trace graph\nOne coloured line per signal"]
+    WAVE --> INTERACT["🖱️ Interact with the plot\nScroll to zoom in/out\nDrag to pan left/right\nClick probe buttons to show/hide traces"]
+
+    INTERACT --> DONE([✅ Analysis complete])
+
+    style START fill:#4F46E5,color:#fff,stroke:none
+    style DONE fill:#059669,color:#fff,stroke:none
+    style NGSPICE fill:#7C3AED,color:#fff,stroke:none
+```
+
+### What happens inside the backend
+
+```mermaid
+flowchart LR
+    A["Netlist text\narrives via POST /simulate"] --> B["Pre-process\nAdd save all\nInject spicelib path\nWrap in .control block"]
+    B --> C["Write circuit.cir\nto a temp folder"]
+    C --> D["Run: ngspice -b circuit.cir\nMax 30 seconds timeout"]
+    D --> E["Read output.raw\nASCII format vectors"]
+    E --> F["Parse: extract\ntime/freq + voltage/current arrays"]
+    F --> G["Return JSON\nto browser"]
+```
+
 ## Architecture
 
 ```
