@@ -45,11 +45,11 @@ export const IC_SYMDEFS = new Map<string, SymDef>();
 /** Resolves when symtable.json has been fetched (for Tab 2 IC picker). */
 export const icPickerReady: Promise<void> = (async (): Promise<void> => {
   try {
-    const r = await fetch('data/symtable.json');
+    const r = await fetch('data/symbols.json');
     _symtable = await r.json() as Record<string, SymTableEntry>;
     _loaded = true;
   } catch (e) {
-    console.warn('ic-picker: could not load symtable.json —', e);
+    console.warn('ic-picker: could not load symbols.json —', e);
   }
 })();
 
@@ -71,9 +71,9 @@ export function searchICs(query: string): IcMatch[] {
   for (const key of Object.keys(_symtable)) {
     const entry = _symtable[key]!;
     if (entry.retired) continue;
-    const parts    = key.split('\\');
+    const parts    = key.split('/');
     const base     = parts.pop()!;
-    const category = parts.join('\\') || 'Other';
+    const category = parts.slice(0, -1).join('/') || 'Other';
     if (base.toLowerCase().includes(q)) {
       results.push({ key, label: base, npins: entry.pins.length, category });
       if (results.length >= 20) break;
@@ -95,7 +95,7 @@ export function makeIcSymDef(key: string): SymDef | null {
   const entry = _symtable[key];
   if (!entry) return null;
 
-  const base       = key.split('\\').pop()!;
+  const base       = key.split('/').pop()!;
   const N          = entry.pins.length;
   const leftCount  = Math.ceil(N / 2);
   const rightCount = N - leftCount;

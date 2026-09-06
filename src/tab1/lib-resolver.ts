@@ -40,7 +40,7 @@ let _db: StdlibDb | null = null;
  */
 export const stdlibReady: Promise<void> = (async (): Promise<void> => {
   try {
-    const r = await fetch('data/stdlib_db.json');
+    const r = await fetch('data/stdlib.json');
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     _db = await r.json() as StdlibDb;
     logger.debug(

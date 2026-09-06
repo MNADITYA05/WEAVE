@@ -19,7 +19,8 @@ const TABLE_SIM_TYPES = new Set(['op', 'tf']);
 function renderResultTable(vectors: SimVector[], simType: string): string {
   const title = simType === 'op' ? 'Operating Point' : 'Transfer Function';
   const rows = vectors.map(v => {
-    const val = v.data[0] ?? 0;
+    const raw0 = v.data[0] ?? 0;
+    const val = Array.isArray(raw0) ? Math.hypot(raw0[0], raw0[1]) : raw0;
     const fmt = Math.abs(val) < 1e-3 || Math.abs(val) > 1e6
       ? val.toExponential(4)
       : val.toPrecision(6);

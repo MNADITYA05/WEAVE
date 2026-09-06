@@ -5,7 +5,7 @@
  * Provides: symbol lookup, subckt→symbol resolution, synthetic block emission.
  */
 
-import type { SymbolDef } from '../types.js';
+import type { SymbolDef, Point, BBox } from '../types.js';
 
 // ─── Mutable symbol-table exports (populated by symbolsReady) ─────────────────
 
@@ -79,7 +79,7 @@ export type SvgShape = {
 export function ltspicePrimToSvg(p: RawSymEntry['draw'][number]): SvgShape | null {
   switch (p.t) {
     case 'line':
-      return { t: 'line', x1: p.x1, y1: p.y1, x2: p.x2, y2: p.y2 };
+      return { t: 'line', x1: p.x1 ?? 0, y1: p.y1 ?? 0, x2: p.x2 ?? 0, y2: p.y2 ?? 0 };
 
     case 'rect': {
       const x = Math.min(p.x1!, p.x2!);
@@ -128,26 +128,20 @@ export function ltspicePrimToSvg(p: RawSymEntry['draw'][number]): SvgShape | nul
 }
 
 /**
- * Cache of converted sym-draw-full entries, keyed by fd_key (e.g. "misc/ne555").
- * Populated lazily on first request via getFullSymDraw().
+ * Cache of draw shapes from symbols.json, keyed by fd_key (e.g. "misc/ne555").
+ * _symDrawFullRaw is populated during symbolsReady from the merged symbols.json.
+ * No separate fetch of sym-draw-full.json is needed.
  */
 let _symDrawFullRaw: Record<string, RawSymEntry> | null = null;
 let _symDrawFullConverted: Record<string, SvgShape[]> = {};
 
 /**
- * Fetch sym-draw-full.json on first call (cached thereafter).
- * Returns converter-ready shapes for the given fd_key, or null if not found.
+ * Returns renderer-ready shapes for the given fd_key, or null if not found.
+ * Draw data is pre-loaded from symbols.json during symbolsReady.
  */
 export async function getFullSymDraw(fdKey: string): Promise<SvgShape[] | null> {
-  if (!_symDrawFullRaw) {
-    try {
-      _symDrawFullRaw = await fetch('data/sym-draw-full.json').then(r => r.json()) as Record<string, RawSymEntry>;
-    } catch {
-      _symDrawFullRaw = {};
-    }
-  }
   if (_symDrawFullConverted[fdKey] !== undefined) return _symDrawFullConverted[fdKey] ?? null;
-  const entry = _symDrawFullRaw[fdKey];
+  const entry = _symDrawFullRaw?.[fdKey];
   if (!entry?.draw) { _symDrawFullConverted[fdKey] = []; return null; }
   const shapes = entry.draw.map(ltspicePrimToSvg).filter((s): s is SvgShape => s !== null);
   _symDrawFullConverted[fdKey] = shapes;
@@ -182,16 +176,30 @@ let MODEL2SYM: Record<string, string> | null = null;
 let CARD2SYM:  Record<string, string> | null = null;
 
 export const symbolsReady: Promise<void> = (async (): Promise<void> => {
-  const [symtable, pinNames] = await Promise.all([
-    fetch('data/symtable.json').then(r => r.json() as Promise<Record<string, SymbolDef & { retired?: boolean }>>),
-    fetch('data/sym-pin-names.json').then(r => r.json() as Promise<Record<string, Record<string, string>>>).catch(() => ({})),
-  ]);
-  SYMBOLS = symtable;
-  SYM_PIN_NAMES = pinNames;
-  // SYM_DRAW is already populated with inlined primitive draw data above.
-  for (const k of Object.keys(SYMBOLS)) {
-    const base = k.split('\\').pop();
-    if (base) SUBCKT2SYM[base.toLowerCase()] = k;
+  // symbols.json is the consolidated source: draw data, pin positions,
+  // pin names, and symbol attrs — all in one file with forward-slash lowercase keys.
+  const raw = await fetch('data/symbols.json').then(r => r.json()) as Record<string, RawSymEntry & {
+    pinNames?: Record<string, string>;
+    attrs?: Record<string, string>;
+    symType?: string;
+  }>;
+
+  // Populate the draw-data cache so getFullSymDraw works without a second fetch.
+  _symDrawFullRaw = raw as unknown as Record<string, RawSymEntry>;
+
+  // Build SYMBOLS (SymbolDef shape) and SYM_PIN_NAMES from the merged data.
+  for (const [k, entry] of Object.entries(raw)) {
+    (SYMBOLS as Record<string, SymbolDef & { retired?: boolean }>)[k] = {
+      pins:  entry.pins as unknown as Point[],
+      bbox:  entry.bbox as unknown as BBox,
+      attrs: entry.attrs ?? {},
+    };
+    if (entry.pinNames && Object.keys(entry.pinNames).length) {
+      SYM_PIN_NAMES[k] = entry.pinNames;
+    }
+    // Map base name (last path segment) to full key for SUBCKT2SYM
+    const base = k.split('/').pop();
+    if (base) SUBCKT2SYM[base] = k;
   }
   // Reset lazy resolve maps so they are rebuilt from the fresh SYMBOLS table.
   NAME2SYM = null; MODEL2SYM = null; CARD2SYM = null;

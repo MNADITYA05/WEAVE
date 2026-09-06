@@ -343,7 +343,7 @@ function _renderSym(s: RenderSym): string {
   if (resolvedKey !== 'opamp') {
     const isSubckt = !!(s.name && s.name.startsWith('X'));
     if (isSubckt) {
-      const isKnownIc = !!(SUBCKT2SYM[s.key] && SYMBOLS[SUBCKT2SYM[s.key]]);
+      const _sk = SUBCKT2SYM[s.key]; const isKnownIc = !!(_sk && SYMBOLS[_sk]);
       const isGeneric = s.key.startsWith('__block');
       if (isKnownIc || isGeneric) return _renderIcBlock(s);
     }
@@ -351,7 +351,7 @@ function _renderSym(s: RenderSym): string {
 
   // IC block: unknown/unresolved non-opamp component
   if (!resolvedKey) {
-    const isKnownIc = !!(SUBCKT2SYM[s.key] && SYMBOLS[SUBCKT2SYM[s.key]]);
+    const _sk = SUBCKT2SYM[s.key]; const isKnownIc = !!(_sk && SYMBOLS[_sk]);
     const isGeneric = s.key.startsWith('__block');
     if (isKnownIc || isGeneric) return _renderIcBlock(s);
   }
