@@ -5,6 +5,7 @@ FastAPI app exposing /simulate, /ping, and /validate endpoints.
 
 from __future__ import annotations
 
+from typing import Union
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -13,7 +14,6 @@ from runner import run_simulation, SimResult
 
 app = FastAPI(title="Weave Simulation Backend", version="1.0.0")
 
-# Allow the Vite dev server and any localhost origin
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -26,14 +26,15 @@ app.add_middleware(
 
 class SimRequest(BaseModel):
     netlist:  str
-    sim_type: str = "tran"          # "tran" | "ac" | "dc"
-    params:   dict[str, str] = {}   # sim-specific params (tstep, tstop, etc.)
+    sim_type: str = "tran"
+    params:   dict[str, str] = {}
 
 
 class VectorOut(BaseModel):
-    name: str
-    unit: str
-    data: list[float]
+    name:       str
+    unit:       str
+    data:       list[Union[float, list[float]]]   # float for real, [re, im] for complex
+    is_complex: bool = False
 
 
 class SimResponse(BaseModel):
@@ -48,6 +49,23 @@ class SimResponse(BaseModel):
 class ValidateResponse(BaseModel):
     ok:     bool
     errors: list[str] = []
+
+
+def _serialize_vector_data(data: list, is_complex: bool) -> list[Union[float, list[float]]]:
+    """
+    Serialize vector data for JSON transport.
+    Real values  → list[float]
+    Complex values → list[[re, im]]  (JSON has no complex type)
+    """
+    if not is_complex:
+        return [float(v) for v in data]
+    out = []
+    for v in data:
+        if isinstance(v, complex):
+            out.append([v.real, v.imag])
+        else:
+            out.append([float(v), 0.0])
+    return out
 
 
 # ─── Endpoints ────────────────────────────────────────────────────────────────
@@ -69,11 +87,20 @@ def simulate(req: SimRequest) -> SimResponse:
         params=req.params,
     )
 
+    vectors_out = []
+    for v in result.vectors:
+        vectors_out.append(VectorOut(
+            name=v.name,
+            unit=v.unit,
+            is_complex=v.is_complex,
+            data=_serialize_vector_data(v.data, v.is_complex),
+        ))
+
     return SimResponse(
         ok=result.ok,
         sim_type=result.sim_type,
         x_var=result.x_var,
-        vectors=[VectorOut(name=v.name, unit=v.unit, data=v.data) for v in result.vectors],
+        vectors=vectors_out,
         log=result.log,
         error=result.error,
     )
@@ -97,7 +124,6 @@ def validate(req: SimRequest) -> ValidateResponse:
     with tempfile.TemporaryDirectory() as tmpdir:
         _copy_spicelib(tmpdir)
         cir_path = os.path.join(tmpdir, "circuit.cir")
-        # Minimal netlist — just check parse
         Path(cir_path).write_text(_resolve_spicelib(req.netlist))
         try:
             proc = subprocess.run(

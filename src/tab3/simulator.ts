@@ -8,7 +8,7 @@ import { WaveformViewer } from './waveform-viewer.js';
 const BACKEND = (import.meta as unknown as { env: Record<string, string> }).env?.VITE_SIM_BACKEND ?? 'http://localhost:8000';
 const NETLIST_KEY = 'weave-sim-netlist-v1';
 
-type SimVector = { name: string; unit: string; data: number[] };
+type SimVector = { name: string; unit: string; data: (number | [number, number])[]; is_complex: boolean };
 type SimData = {
   ok: boolean; sim_type: string; x_var: string;
   vectors: SimVector[]; log: string; error: string;

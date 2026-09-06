@@ -7,9 +7,10 @@ from pathlib import Path
 
 @dataclass
 class SimVector:
-    name:   str
-    unit:   str
-    data:   list = field(default_factory=list)
+    name:       str
+    unit:       str
+    data:       list = field(default_factory=list)
+    is_complex: bool = False
 
 
 @dataclass
@@ -37,6 +38,25 @@ def _detect_sim_type(plot_name: str) -> str:
     if "dc" in p:
         return "dc"
     return "tran"
+
+
+def _parse_value(token: str) -> float | complex:
+    """
+    Parse a single ngspice ASCII raw value token.
+    Real analyses emit plain floats: '1.23e-03'
+    AC analysis emits complex pairs:  '1.23e-03,4.56e-07'
+    Returns complex when a comma is present, float otherwise.
+    """
+    parts = token.split(",")
+    if len(parts) == 2:
+        try:
+            return complex(float(parts[0]), float(parts[1]))
+        except ValueError:
+            pass
+    try:
+        return float(parts[0])
+    except ValueError:
+        return 0.0
 
 
 def _parse_single_section(section: str) -> tuple[str, list[SimVector]]:
@@ -75,12 +95,12 @@ def _parse_single_section(section: str) -> tuple[str, list[SimVector]]:
                 rows.append(current_row)
                 current_row = []
             for p in parts[1:]:
-                current_row.append(float(p.split(",")[0]))
+                current_row.append(_parse_value(p))
         except ValueError:
             for p in parts:
                 try:
-                    current_row.append(float(p.split(",")[0]))
-                except ValueError:
+                    current_row.append(_parse_value(p))
+                except Exception:
                     pass
     if current_row:
         rows.append(current_row)
@@ -88,7 +108,8 @@ def _parse_single_section(section: str) -> tuple[str, list[SimVector]]:
     vectors = []
     for i, (name, unit) in enumerate(zip(names, units)):
         data = [row[i] for row in rows if i < len(row)]
-        vectors.append(SimVector(name=name, unit=unit, data=data))
+        is_cpx = any(isinstance(v, complex) for v in data)
+        vectors.append(SimVector(name=name, unit=unit, data=data, is_complex=is_cpx))
     return sim_type, vectors
 
 
@@ -96,13 +117,14 @@ def _parse_tf_log(log: str) -> list[SimVector]:
     """Extract .tf scalar results from ngspice stdout/log."""
     vectors: list[SimVector] = []
     for line in log.splitlines():
-        # match lines like:  Transfer function value = 1.234e-03
-        m = re.match(r"^\s*([A-Za-z][\w()\s/]+?)\s*=\s*([0-9eE+\-.]+)\s*$", line)
+        m = re.match(
+            r"^\s*([A-Za-z][\w()\s/]+?)\s*=\s*([0-9eE+\-.]+)\s*$", line
+        )
         if m:
             name = m.group(1).strip()
             try:
                 val = float(m.group(2))
-                vectors.append(SimVector(name=name, unit="", data=[val]))
+                vectors.append(SimVector(name=name, unit="", data=[val], is_complex=False))
             except ValueError:
                 pass
     return vectors
@@ -117,8 +139,6 @@ def _parse_raw(raw_path: str, log: str = "", sim_type_hint: str = "") -> tuple[s
     """
     text = Path(raw_path).read_text(errors="replace")
 
-    # Split into sections by "Plotname:" occurrences
-    # Each section starts just before "Plotname:"
     sections = re.split(r"(?=^Plotname:)", text, flags=re.MULTILINE | re.IGNORECASE)
     sections = [s for s in sections if re.search(r"^Plotname:", s, re.MULTILINE | re.IGNORECASE)]
 
@@ -126,16 +146,13 @@ def _parse_raw(raw_path: str, log: str = "", sim_type_hint: str = "") -> tuple[s
         return sim_type_hint or "tran", []
 
     if len(sections) == 1:
-        # Single plot — normal path
         sim_type, vectors = _parse_single_section(sections[0])
         return sim_type_hint or sim_type, vectors
 
     # Multiple plots → .step sweep
-    # Parse all sections; use first section's x-axis, label y-vectors with step index
     all_parsed = [_parse_single_section(s) for s in sections]
     sim_type = sim_type_hint or all_parsed[0][0]
 
-    # x_var is the first vector of the first section
     first_vectors = all_parsed[0][1]
     if not first_vectors:
         return sim_type, []
@@ -146,11 +163,12 @@ def _parse_raw(raw_path: str, log: str = "", sim_type_hint: str = "") -> tuple[s
     for step_idx, (_, vecs) in enumerate(all_parsed, start=1):
         for v in vecs:
             if v.name == x_var_name:
-                continue  # skip x axis duplicates
+                continue
             merged.append(SimVector(
                 name=f"{v.name}[{step_idx}]",
                 unit=v.unit,
                 data=v.data,
+                is_complex=v.is_complex,
             ))
 
     return "step", merged
