@@ -95,7 +95,7 @@ SPICE netlists are text — powerful, but completely opaque to anyone who isn't 
 | Technology | Purpose |
 |---|---|
 | Custom SPICE parser (`netlist-parser.ts`) | Tokenises and models SPICE netlist elements |
-| Standard library resolver (`lib-resolver.ts`) | Injects `.model`/`.subckt` definitions from `stdlib_db.json` for standard LTspice parts |
+| Standard library resolver (`lib-resolver.ts`) | Injects `.model`/`.subckt` definitions from `stdlib.json` for standard LTspice parts |
 | Union-Find (DSU) (`shared/union-find.ts`) | Wire connectivity → net name assignment in Tab 2 |
 | Custom `.asc` emitter (`flag-emit.ts`, `renderer.ts`) | Produces valid LTspice schematic files |
 | Typed error hierarchy | `WeaveError` → `ParseError \| SymbolError \| LayoutError \| RoutingError` |
@@ -167,14 +167,18 @@ weave/
 ├── package.json                      # npm scripts and dependency manifest
 ├── Dockerfile                        # Backend container image (Python + ngspice)
 ├── docker-compose.yml                # Orchestrates backend (port 8000) + frontend (port 5173)
-├── build_stdlib.py                   # Dev tool: rebuilds data/stdlib_db.json from LTspice lib files
+├── build_stdlib.py                   # Legacy dev tool (superseded by generate_data.py)
+│
+├── scripts/
+│   └── generate_data.py              # Data pipeline: reads LTspice .asy/.lib/.sub → data/symbols.json + data/stdlib.json
 │
 ├── css/
 │   └── style.css                     # Global dark-theme styles
 │
 ├── data/                             # Static data files served by Vite
-│   ├── stdlib_db.json                # Pre-parsed LTspice standard library (slim — pin names only, ~370 KB)
-│   └── stdlib_db_full.json           # Full library with subckt body text (~6.5 MB, for backend/simulator use)
+│   ├── symbols.json                  # Generated: LTspice symbol draw data, pins, attrs (~5.5 MB) — run scripts/generate_data.py
+│   ├── stdlib.json                   # Generated: .subckt and .model definitions from LTspice std lib (~6.4 MB)
+│   └── symbols_db.json               # Static (checked in): hand-curated primitive overrides (~82 KB)
 │
 ├── lib/                              # Third-party libraries (elkjs bundle)
 │
@@ -542,9 +546,10 @@ refactor(backend): split runner into raw_parser and netlist modules
 | ✅ Done | Live multi-trace waveform viewer (zoom, pan, probe toggle) | v5.0 |
 | ✅ Done | Transient / AC / DC sweep simulation types | v5.0 |
 | ✅ Done | Codebase modularisation (single-responsibility modules) | v5.0 |
-| ✅ Done | Standard library resolver (Situation 2): auto-inject `.model`/`.subckt` from `stdlib_db.json` | v5.1 |
+| ✅ Done | Standard library resolver (Situation 2): auto-inject `.model`/`.subckt` from `stdlib.json` | v5.1 |
 | ✅ Done | Missing-libs UI: yellow bar + `.lib`/`.sub` file upload for unresolved parts | v5.1 |
 | ✅ Done | All 7 simulation types: .tran / .ac / .dc / .op / .noise / .tf / .step | v5.1 |
+| ✅ Done | Data pipeline consolidation: 6 JSON files → `symbols.json` + `stdlib.json` via `scripts/generate_data.py` | v5.2 |
 | 📋 Planned | AC phase plot (separate magnitude/phase traces) | v5.2 |
 | 📋 Planned | Cursor / measurement markers on waveform | v5.2 |
 | 📋 Planned | Import `.asc` file back into Tab 2 canvas | v6.0 |
@@ -566,6 +571,7 @@ Detailed technical documentation lives in the [`docs/`](./docs/) folder:
 | [`docs/elk.md`](./docs/elk.md) | ELK layout engine deep-dive: graph format, algorithm, timeout |
 | [`docs/stdlib.md`](./docs/stdlib.md) | Standard library resolver, `stdlib_db.json` build process |
 | [`docs/docker.md`](./docs/docker.md) | Docker setup, services, environment variables, spicelib |
+| [`docs/data-pipeline.md`](./docs/data-pipeline.md) | Data pipeline: `symbols.json` + `stdlib.json` generation, file formats, key conventions |
 
 ---
 
