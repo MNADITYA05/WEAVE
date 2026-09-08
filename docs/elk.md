@@ -4,9 +4,17 @@ ELK (Eclipse Layout Kernel) is an open-source graph layout engine used in Tab 1 
 
 ---
 
-## What ELK Does — Simple Explanation
+## What is a "graph layout engine"?
 
-Imagine you have a list of circuit components (resistors, capacitors, transistors) and you know which ones are connected. But you have **no idea where to draw them on the page**. ELK solves exactly that — it figures out the x,y position for every component so the result looks like a proper schematic, not a mess.
+When Tab 1 receives a SPICE netlist, it knows what every component is and how the wires connect them — but it has no idea where to draw anything on the page. There are no positions in a SPICE file, only connections.
+
+A graph layout engine solves exactly this problem. It takes a list of boxes (components) and lines connecting them (wires) and figures out where to place every box so the result looks neat and readable — no boxes on top of each other, wires running as straight as possible, signal flow going left to right.
+
+Think of it like this: imagine you are given a list of cities and a list of roads connecting them, but no map. Your job is to draw the map. The graph layout engine is the algorithm that draws the map.
+
+---
+
+## What ELK Does — Simple Explanation
 
 ```mermaid
 flowchart TD
@@ -25,33 +33,35 @@ flowchart TD
     style ELK fill:#4F46E5,color:#fff,stroke:none
 ```
 
-### The two-pass strategy Weave uses
+### The three-pass strategy Weave uses
 
 ```mermaid
 flowchart LR
-    A["Pass 1 — Rough layout\nNo constraints\nELK places freely"] --> B["Analyse result\nFind feedback components\nAssign rank hints"]
-    B --> C["Pass 2 — Refined layout\nFeedback components pinned\nto correct columns"]
+    A["Pass 1 — Rough layout\nNo constraints\nELK places freely"] --> B["Analyse result\nDetect transistor pairs,\ncascodes, feedback components\nAssign partition + rank hints"]
+    B --> C["Pass 2 — Refined layout\nTopology and feedback hints applied\nComponents grouped correctly"]
     C --> D["apply-layout.ts\nSnap all positions\nto 16px grid"]
     D --> E(["Final schematic\npositions ready"])
 
     style E fill:#059669,color:#fff,stroke:none
 ```
 
+---
+
 ## Why ELK?
 
-A SPICE netlist has no position information — it only specifies connectivity. To produce a readable schematic, components must be placed at (x, y) coordinates and connected by wires that don't overlap awkwardly. This is the **graph layout problem**.
+A SPICE netlist has no position information — it only specifies connectivity. To produce a readable schematic, components must be placed at (x, y) coordinates and connected by wires that do not overlap awkwardly. This is the **graph layout problem**.
 
 ELK is chosen because:
-- It implements the **Layered** algorithm (also known as the Sugiyama framework), which is ideal for directed circuits: sources on the left, loads on the right
+- It implements the **Layered algorithm** (also called the Sugiyama framework), which is ideal for directed circuits: sources on the left, loads on the right
 - It handles large graphs (100+ components) in reasonable time
-- The elkjs npm bundle runs entirely in the browser — no server round-trip
-- It supports explicit rank/layer constraints, which Weave uses for topology-aware placement
+- The elkjs npm bundle runs entirely in the browser — no server round-trip needed
+- It supports explicit layer and partition constraints, which Weave uses for topology-aware placement
 
 ---
 
 ## How ELK is Invoked (`layout.ts`)
 
-ELK runs inside a **Web Worker** to keep the main thread responsive:
+ELK runs inside a **Web Worker** — a background thread that runs separately from the main browser thread. This keeps the page responsive while ELK is computing. You can still see the UI and the loading indicator while ELK works in the background.
 
 ```typescript
 // layout.ts
@@ -68,32 +78,36 @@ export async function runLayout(graph: ElkGraph): Promise<ElkGraph> {
 }
 ```
 
-**Timeout:** If ELK takes more than 7 seconds (unusual for typical circuits), a `LayoutError` is thrown and the pipeline falls back to a simple linear placement algorithm.
+**The 7-second timeout and worker restart:**
+
+If ELK has not finished within 7 seconds (which can happen on very large or unusually complex netlists), the timeout fires, a `LayoutError` is thrown, and the Web Worker is killed and replaced with a fresh one. Killing the worker resets ELK's internal state completely — any in-progress computation is discarded.
+
+After the worker is restarted, the pipeline does **not** retry ELK. Instead it falls back to a simple grid placement (described below). This is a deliberate choice: if ELK timed out once on a particular graph, retrying it would likely time out again.
 
 ---
 
 ## ELK Graph Format
 
-ELK operates on a JSON graph structure of nodes and edges. Weave builds this from `PlacedComponent[]`:
+ELK operates on a JSON graph structure of nodes and edges. Weave builds this from the placed component list:
 
 ```typescript
 interface ElkGraph {
   id: string;
-  layoutOptions: Record<string, string>;
-  children: ElkNode[];
-  edges: ElkEdge[];
+  layoutOptions: Record<string, string>;  // global layout settings
+  children: ElkNode[];                    // one per component
+  edges: ElkEdge[];                       // one per net connection
 }
 
 interface ElkNode {
-  id: string;                    // component id (e.g. 'c1')
-  width: number;                 // bounding box width in abstract units
-  height: number;                // bounding box height
+  id: string;           // component id (e.g. 'r1')
+  width: number;        // bounding box width
+  height: number;       // bounding box height
   layoutOptions?: Record<string, string>;  // per-node overrides
-  ports?: ElkPort[];             // one port per pin
+  ports?: ElkPort[];    // one port per pin
 }
 
 interface ElkPort {
-  id: string;          // e.g. 'c1.p' (pin name)
+  id: string;          // e.g. 'r1.p' (component id + pin name)
   properties: {
     'port.side': 'WEST' | 'EAST' | 'NORTH' | 'SOUTH';
   };
@@ -101,21 +115,31 @@ interface ElkPort {
 
 interface ElkEdge {
   id: string;          // e.g. 'e_net_N001'
-  sources: string[];   // ['c1.p']  (port id)
-  targets: string[];   // ['c2.n']  (port id)
+  sources: string[];   // ['r1.p']  — port id of the source end
+  targets: string[];   // ['c1.n']  — port id of the target end
 }
 ```
 
-### Port sides
+### Port sides — and why they are locked
 
-Pin direction is assigned based on the component's orientation hint from Stage 3:
+Each pin on each component is assigned a side: WEST (left), EAST (right), NORTH (top), or SOUTH (bottom). This assignment comes from the orientation analysis in Stage 3 of the pipeline.
 
 | Pin role | Port side |
 |---|---|
-| Input (left-hand net) | WEST |
-| Output (right-hand net) | EAST |
-| Shunt (connects to GND rail) | SOUTH |
-| Shunt (connects to power rail) | NORTH |
+| Input (signal flowing in from the left) | WEST |
+| Output (signal flowing out to the right) | EAST |
+| Shunt to Ground rail | SOUTH |
+| Shunt to Power rail | NORTH |
+
+**Important — port positions are fixed:** ELK is given the constraint `PORT_CONSTRAINTS: FIXED_POS`, which means it is not allowed to move ports to different sides of a node. The sides assigned by Stage 3 are locked. ELK places the nodes, but the pin locations on each node are frozen.
+
+This matters for debugging: if a component's wires look like they are coming from the wrong side, the cause is almost always in Stage 3 (`orientation.ts`) assigning the wrong port side — not in ELK. ELK cannot correct a wrong port assignment.
+
+### Self-edges — the bridge case
+
+Normally, every edge in the ELK graph connects two different nodes (two different components). But occasionally a component has two pins connected to the same net — for example, a wire that loops back, or a component used as a direct bridge. This creates a self-edge: an edge from a node back to itself.
+
+ELK cannot meaningfully route a self-edge. Weave detects these before building the graph and marks those components as **bridges**, handling their wire routing separately outside ELK. They do not appear as edges in the ELK graph at all.
 
 ---
 
@@ -130,92 +154,131 @@ Global layout options passed in `layoutOptions`:
   "elk.layered.spacing.nodeNodeBetweenLayers": "80",
   "elk.spacing.nodeNode": "48",
   "elk.layered.crossingMinimization.strategy": "LAYER_SWEEP",
-  "elk.layered.nodePlacement.strategy": "BRANDES_KOEPF"
+  "elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX"
 }
 ```
 
-| Option | Value | Purpose |
+| Option | Value | What it means in plain terms |
 |---|---|---|
-| `elk.algorithm` | `layered` | Sugiyama hierarchical layout |
-| `elk.direction` | `RIGHT` | Signal flows left-to-right |
-| `nodeNodeBetweenLayers` | `80` | Horizontal gap between component columns |
-| `spacing.nodeNode` | `48` | Vertical gap between components in the same column |
-| `crossingMinimization.strategy` | `LAYER_SWEEP` | Reduce wire crossings iteratively |
-| `nodePlacement.strategy` | `BRANDES_KOEPF` | Balance node positions within a layer |
+| `elk.algorithm` | `layered` | Use the Sugiyama hierarchical layout algorithm |
+| `elk.direction` | `RIGHT` | Signal flows left to right across the schematic |
+| `nodeNodeBetweenLayers` | `80` | Horizontal gap between columns of components (in abstract units, later scaled to 16px grid) |
+| `spacing.nodeNode` | `48` | Vertical gap between components stacked in the same column |
+| `crossingMinimization.strategy` | `LAYER_SWEEP` | Reduce wire crossings by sweeping left-to-right and right-to-left alternately |
+| `nodePlacement.strategy` | `NETWORK_SIMPLEX` | Set exact component positions using the Network Simplex algorithm |
+
+### Per-edge hints
+
+In addition to the global options, Weave sets a hint on every individual edge:
+
+- **Non-feedback edges** get `elk.layered.priority.straightness: 10` — a high priority telling ELK's crossing-minimisation phase to keep these wires as straight as possible.
+- **Feedback loop edges** get `elk.layered.priority.straightness: 0` — no straightness priority, allowing ELK to bend them freely since they must curve back against the signal flow anyway.
 
 ---
 
-## Two-Pass Layout
+## The Three-Pass Layout Strategy
 
-Tab 1 runs ELK **twice**:
+Weave runs ELK across three phases — two ELK passes separated by a topology analysis step.
 
 ### Pass 1 — Initial layout
 
-The first pass produces a coarse layout based purely on connectivity. This gives ELK an unbiased starting point.
+The first ELK pass produces a coarse layout based purely on connectivity and the port side constraints. No topology hints are applied. This gives ELK an unbiased starting point and reveals the rough structure of the circuit.
+
+### Between passes — topology analysis and hint injection
+
+After Pass 1, Weave analyses the circuit for known transistor topologies:
+
+- **Differential pairs:** two transistors sharing an emitter (or source) net with different base (or gate) connections. Common in op-amp input stages and comparators.
+- **Current mirrors:** transistors sharing a gate or base where one has its drain/collector connected back to its own gate (a diode connection).
+- **Cascodes:** one transistor's drain connected directly to another's source, stacking them vertically.
+- **Source degeneration:** a transistor's source (or emitter) net shared with a resistor.
+
+When these patterns are detected, Weave injects two types of hints into the ELK graph for Pass 2:
+
+1. **Partition IDs** — components that should be grouped together (like a diff pair) are assigned the same partition ID. ELK's partitioning feature then keeps them in adjacent columns.
+2. **Layer constraints** (`elk.layered.layering.layer`) — specific column numbers are assigned to feedback components, ensuring they land in the right part of the schematic rather than wherever ELK would naturally place them.
+
+**Note:** For layer constraints to be respected, ELK's partitioning feature must be explicitly enabled (`partitioning: true` in the layout options for Pass 2). Without this flag, the layer hints are treated as suggestions that ELK may ignore. Partitioning is only active for Pass 2 — Pass 1 runs without it.
 
 ### Pass 2 — Topology-aware layout
 
-After the classifier and orientation stages have run, Weave injects per-node rank constraints:
-
-```json
-{
-  "elk.layered.layering.layer": "2"
-}
-```
-
-This pins feedback components to a specific layer, preventing ELK from placing a feedback resistor to the left of the op-amp output it connects to. The second pass re-runs ELK with these constraints applied.
+The second ELK pass re-runs with all the topology hints and layer constraints applied. The result is a layout where matched transistors sit near each other, feedback components land in sensible positions relative to their op-amps, and the overall structure better reflects the circuit's actual topology.
 
 ---
 
-## Layered Algorithm (Sugiyama Framework)
+## The Layered Algorithm (Sugiyama Framework)
 
-The Layered algorithm runs in four phases:
+The Layered algorithm runs in four phases. Here is what each one does in plain terms.
 
 ### Phase 1 — Cycle Removal
 
-Directed graphs can have cycles (feedback loops). ELK temporarily reverses some edges to make the graph acyclic, then restores them after layout.
+**The problem:** Circuits with feedback create loops in the graph. Imagine a directed graph where every edge points "forward" — except one edge that points backward, creating a cycle. A layout algorithm that tries to assign column numbers to nodes with a cycle gets stuck in an infinite loop (node A must be to the left of node B, but node B must also be to the left of node A).
+
+**The solution:** ELK temporarily removes the minimum number of edges needed to break all cycles — making the graph **acyclic** (acyclic simply means "containing no cycles," the way a family tree has no cycles because no one is their own ancestor). After the layout is computed, those edges are restored and routed as feedback wires going right-to-left.
+
+**In plain terms:** Find the shortest list of wires you could remove to eliminate all loops. Pretend those wires do not exist. Compute the layout. Then add them back as special backward-flowing wires.
 
 ### Phase 2 — Layer Assignment
 
-Each node is assigned to a **layer** (column in the schematic). ELK uses the **longest path** heuristic: a node's layer = 1 + max(layer of all predecessors). This ensures signal sources are always to the left of their loads.
+**The problem:** We need to decide which column each component goes in.
 
-**Example for RC filter:**
-- V1 (source) → layer 0
-- R1 (depends on V1's output) → layer 1
-- C1 (depends on R1's output) → layer 2
+**The solution:** ELK uses the **longest path** rule. For every component, count the longest chain of components you must pass through to reach it from any source (voltage or current source). That chain length is the component's column number.
+
+**Why longest path?** Using the longest path (rather than the shortest) guarantees that if component A feeds component B, A will always be in a column to the left of B. No component ever ends up in the same column as something it drives.
+
+**Example for a simple filter chain:**
+- V1 (source, nothing feeds it) → column 0
+- R1 (fed by V1, longest path from source = 1 hop) → column 1
+- C1 (fed by R1, longest path from source = 2 hops) → column 2
 
 ### Phase 3 — Crossing Minimisation
 
-Within each layer, nodes are reordered to minimise wire crossings between layers. ELK uses the **Layer Sweep** strategy: sweep left-to-right and right-to-left alternately, sorting nodes by their median neighbour position.
+**The problem:** Within each column, multiple components are stacked vertically. The order they appear in determines how many wires cross between adjacent columns. Fewer crossings means a cleaner, more readable schematic.
+
+**The solution:** ELK uses the **Layer Sweep** strategy. It makes multiple passes: in one pass it goes left-to-right, in the next right-to-left, each time reordering the components within each column to reduce crossings. After a few passes the order stabilises.
+
+**In plain terms:** Imagine untangling a bundle of cables. You go from one end to the other, untwisting pairs of cables wherever they cross. Then you go back the other way. Repeat until nothing is crossed anymore.
+
+Each component's position in its column is determined by looking at the positions of its neighbours in the adjacent column and finding the **median** — the middle value. Think of it like finding where to sit at a table so you are closest to the average position of the friends you want to talk to.
 
 ### Phase 4 — Node Placement
 
-Within each layer, nodes are given exact y-coordinates using the **Brandes-Köpf** algorithm, which balances nodes symmetrically around their median neighbour position to produce compact, aesthetically pleasing results.
+**The problem:** We know which column each component is in and in what order components appear within each column. Now we need exact y-coordinates.
+
+**The solution:** ELK uses the **Network Simplex** algorithm. This is an optimisation technique that treats the layout problem like a flow network — imagine water flowing through pipes — and finds the arrangement that minimises total wire length. Components are spaced to balance compactness against readability, with the spacing constants from the layout options controlling the minimum gaps.
+
+**In plain terms:** Network Simplex finds the positions that make the total length of all wires as short as possible, while respecting the minimum spacing rules. Shorter wires mean a more compact and readable schematic.
 
 ---
 
 ## Translating ELK Output to World Coordinates
 
-ELK returns positions in abstract units (not LTspice world units). `apply-layout.ts` maps them:
+ELK returns positions in abstract units. Weave converts them to LTspice world coordinates (which must be multiples of 16) in `apply-layout.ts`:
 
 ```typescript
-// ELK position → LTspice world coordinate
+// ELK abstract position → LTspice world coordinate
 const worldX = snap(elkNode.x * SCALE_FACTOR + ORIGIN_X);
 const worldY = snap(elkNode.y * SCALE_FACTOR + ORIGIN_Y);
 ```
 
-`SCALE_FACTOR` is chosen so that the average component spacing is ~160 px (10 × GRID = 10 × 16). `ORIGIN_X = 160`, `ORIGIN_Y = 160` to give a left/top margin.
-
-The `snap()` function rounds to the nearest `GRID = 16` boundary — LTspice requires all coordinates to be multiples of 16.
+- `SCALE_FACTOR` is chosen so that the average component spacing is approximately 160 px (10 × the grid size of 16).
+- `ORIGIN_X = 160`, `ORIGIN_Y = 160` gives a left and top margin so components do not sit at the very edge of the canvas.
+- `snap()` rounds to the nearest multiple of 16 — LTspice requires all coordinates to be on the grid.
 
 ---
 
-## Timeout Handling
+## Timeout and Fallback
 
-If ELK takes more than 7 seconds (which can happen on very large netlists or if the worker fails to initialise), the pipeline catches the `LayoutError` and falls back to a **grid placement** algorithm:
+If ELK takes more than 7 seconds, the pipeline:
+
+1. Throws a `LayoutError('ELK timeout')`
+2. Kills the Web Worker (completely resetting ELK's state)
+3. Creates a new Web Worker (ready for the next conversion)
+4. Falls back to a **grid placement** algorithm
+
+The grid placement simply arranges components in rows and columns, left to right, top to bottom, without considering connectivity at all:
 
 ```typescript
-// Fallback: place components in a grid, left-to-right, top-to-bottom
 for (let i = 0; i < comps.length; i++) {
   comps[i].pos = {
     x: ORIGIN_X + (i % COLS) * COL_SPACING,
@@ -224,7 +287,7 @@ for (let i = 0; i < comps.length; i++) {
 }
 ```
 
-The fallback produces a readable (if not optimal) schematic that the user can then manually adjust in Tab 2.
+**Honest assessment of the fallback:** The grid placement is correct in the sense that components are all visible and not overlapping. But it ignores which components are connected to which, so related components may end up far apart and wires will span the entire canvas. For circuits with more than about 10 components, the fallback result is typically hard to read. The recommended action when a timeout occurs is to open the `.asc` file in LTspice or Tab 2 and manually rearrange the components into a sensible layout.
 
 ---
 
@@ -240,16 +303,22 @@ layout.ts                        elk-worker.js
                      ◄──postMessage──  result / error
 ```
 
-If the worker is unavailable (e.g., CSP blocks worker script), ELK can fall back to running synchronously on the main thread, but this blocks the UI during layout.
+**If the worker cannot start:** Some web servers and CDN configurations enforce a strict Content Security Policy (CSP) — a set of rules that restricts what scripts a page is allowed to run. If the CSP does not permit Web Worker scripts, the worker will fail to load. In that case, elkjs falls back to running ELK synchronously on the main thread. This blocks the UI during layout (the page appears frozen while ELK runs), but the layout itself will still work correctly.
 
 ---
 
 ## Debugging ELK Issues
 
-If the schematic layout looks wrong:
+If the schematic layout looks wrong, work through these checks in order:
 
-1. **Open the browser console** — ELK errors and warnings are logged there
-2. **Check for `LayoutError: ELK timeout`** — increase the timeout in `layout.ts` (line `7000`) or simplify the netlist
-3. **Inspect the ELK graph** — add `console.log(JSON.stringify(graph, null, 2))` before the `elk.layout()` call to see the raw input
-4. **Port sides wrong** — if wires cross excessively, the WEST/EAST assignment in `layout.ts` may be incorrect for that topology; check `orientation.ts` output
-5. **Rank constraints** — if a component is in the wrong column, check the `elk.layered.layering.layer` value assigned to it in Pass 2
+1. **Open the browser console** — ELK errors and warnings are logged there. Look for any red error lines when you click Convert.
+
+2. **Check for `LayoutError: ELK timeout`** — if you see this, ELK ran out of time. Try simplifying the netlist (fewer components), or increase the timeout in `layout.ts` (the `7000` millisecond value on the timeout line).
+
+3. **Wrong port sides (wires coming from wrong direction)** — this is almost always caused by `orientation.ts` assigning the wrong port side, not ELK. Check the `esc` (escape direction) values being passed from Stage 3. Remember: port positions are frozen by `FIXED_POS` — ELK cannot fix a wrong port assignment.
+
+4. **Components in the wrong column** — check the `elk.layered.layering.layer` constraint being set on the component in Pass 2. Also verify that `partitioning: true` is set in the Pass 2 layout options — without it, layer constraints are ignored.
+
+5. **Inspect the raw ELK graph** — add `console.log(JSON.stringify(graph, null, 2))` before the `elk.layout()` call to print the full input graph. Paste it into the [ELK playground](https://rtsys.informatik.uni-kiel.de/elklive/) to visualise it interactively and test different options.
+
+6. **Topology hints not grouping correctly** — if a diff pair or cascode is not being placed together, check `topology.ts`. The detection is heuristic and depends on specific pin-index conventions for BJT and FET models. Non-standard models with different pin orderings will not be detected.
