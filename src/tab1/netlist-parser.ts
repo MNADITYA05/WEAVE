@@ -125,7 +125,11 @@ function parseKLines(lines: string[]): KRecord[] {
 /**
  * Parse a SPICE netlist string into components and directives.
  *
- * The first line is always the SPICE title (skipped by convention).
+ * A leading title/comment line (starting with '*' or ';', as LTspice always
+ * emits) is skipped by the ordinary comment filter below — there is no
+ * unconditional "always skip line 0" rule, since many hand-written or
+ * pasted netlists omit the title line entirely and start straight with the
+ * first element (see tests/suite.js fixtures, none of which have a title).
  * Continuation lines starting with '+' are joined to the preceding line.
  * Lines inside an inline .subckt ... .ends body are collected as directives.
  *
@@ -148,12 +152,13 @@ export function parseNetlist(text: string): ParsedNetlist {
     }
   }
 
-  // ── Pre-pass 1: collect all non-title non-comment lines for scanning ───────
-  // Skip index 0 (title) and blank/comment lines. We scan these for .model and
-  // .subckt declarations before processing element lines, so that BJT/MOSFET
-  // polarity and subcircuit pin order are known when we encounter their instances.
+  // ── Pre-pass 1: collect all non-comment lines for scanning ─────────────────
+  // Skip blank/comment lines (a leading title comment is filtered here too).
+  // We scan these for .model and .subckt declarations before processing
+  // element lines, so that BJT/MOSFET polarity and subcircuit pin order are
+  // known when we encounter their instances.
   const scanLines: string[] = [];
-  for (let i = 1; i < joined.length; i++) {
+  for (let i = 0; i < joined.length; i++) {
     const ln = joined[i]!.trim();
     if (!ln || ln.startsWith('*') || ln.startsWith(';')) continue;
     scanLines.push(ln);
@@ -177,7 +182,6 @@ export function parseNetlist(text: string): ParsedNetlist {
     if (raw === undefined) continue;
     const ln = raw.trim();
     if (!ln || ln.startsWith('*') || ln.startsWith(';')) continue;
-    if (i === 0) continue; // SPICE title line — always skip
 
     if (ln.startsWith('.')) {
       if (/^\.subckt\b/i.test(ln)) insub++;
